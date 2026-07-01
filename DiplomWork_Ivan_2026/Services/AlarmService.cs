@@ -1,0 +1,74 @@
+﻿using DiplomWork_Ivan_2026.Enums;
+using DiplomWork_Ivan_2026.Models;
+using DiplomWork_Ivan_2026.Simulation;
+
+namespace DiplomWork_Ivan_2026.Services
+{
+    public class AlarmService
+    {
+        public List<AlarmInfo> ActiveAlarms { get; } = new List<AlarmInfo>();
+
+        public void CheckAlarms(VacuumDryerProcess process, ProcessSettings settings)
+        {
+            ActiveAlarms.Clear();
+
+            var state = process.State;
+            var material = process.SelectedMaterial;
+
+            if (material == null)
+                return;
+
+            if (state.Temperature > material.MaxTemperature)
+            {
+                ActiveAlarms.Add(new AlarmInfo
+                {
+                    Type = AlarmType.HighTemperature,
+                    Severity = AlarmSeverity.Critical,
+                    Message = $"High temperature! Current: {state.Temperature:F1} °C, Limit: {material.MaxTemperature:F1} °C"
+                });
+
+                process.Heater.TurnOff();
+            }
+
+            if (settings.TemperatureSetpoint > material.MaxTemperature)
+            {
+                ActiveAlarms.Add(new AlarmInfo
+                {
+                    Type = AlarmType.SetpointAboveMaterialLimit,
+                    Severity = AlarmSeverity.Warning,
+                    Message = $"Temperature setpoint exceeds material limit. Setpoint: {settings.TemperatureSetpoint:F1} °C, Limit: {material.MaxTemperature:F1} °C"
+                });
+            }
+
+            if (state.Pressure > settings.PressureSetpoint + 30)
+            {
+                ActiveAlarms.Add(new AlarmInfo
+                {
+                    Type = AlarmType.PressureTooHigh,
+                    Severity = AlarmSeverity.Warning,
+                    Message = $"Pressure is too high. Current: {state.Pressure:F1} kPa"
+                });
+            }
+
+            if (state.Pressure < 5)
+            {
+                ActiveAlarms.Add(new AlarmInfo
+                {
+                    Type = AlarmType.PressureTooLow,
+                    Severity = AlarmSeverity.Critical,
+                    Message = $"Pressure is too low. Current: {state.Pressure:F1} kPa"
+                });
+            }
+
+            if (state.IsCompleted)
+            {
+                ActiveAlarms.Add(new AlarmInfo
+                {
+                    Type = AlarmType.ProcessCompleted,
+                    Severity = AlarmSeverity.Info,
+                    Message = "Drying process completed."
+                });
+            }
+        }
+    }
+}
