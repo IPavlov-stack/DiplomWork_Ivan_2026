@@ -62,7 +62,7 @@ namespace DiplomWork_Ivan_2026.Simulation
 
         private void UpdateTemperature(double deltaTime, ProcessSettings settings)
         {
-            double heatingEffect = Heater.Power / 100.0 * 0.35;
+            double heatingEffect = Heater.Power / 100.0 * 0.8;
             double coolingLoss = (State.Temperature - settings.AmbientTemperature) * 0.01;
 
             State.Temperature += (heatingEffect - coolingLoss) * deltaTime;

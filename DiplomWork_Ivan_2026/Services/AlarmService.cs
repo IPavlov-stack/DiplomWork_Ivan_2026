@@ -2,11 +2,14 @@
 using DiplomWork_Ivan_2026.Models;
 using DiplomWork_Ivan_2026.Simulation;
 
+using System.Linq;
+
 namespace DiplomWork_Ivan_2026.Services
 {
     public class AlarmService
     {
         public List<AlarmInfo> ActiveAlarms { get; } = new List<AlarmInfo>();
+        public List<AlarmInfo> AlarmHistory { get; } = new List<AlarmInfo>();
 
         public void CheckAlarms(VacuumDryerProcess process, ProcessSettings settings)
         {
@@ -20,7 +23,7 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (state.Temperature > material.MaxTemperature)
             {
-                ActiveAlarms.Add(new AlarmInfo
+                AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.HighTemperature,
                     Severity = AlarmSeverity.Critical,
@@ -32,7 +35,7 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (settings.TemperatureSetpoint > material.MaxTemperature)
             {
-                ActiveAlarms.Add(new AlarmInfo
+                AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.SetpointAboveMaterialLimit,
                     Severity = AlarmSeverity.Warning,
@@ -42,7 +45,7 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (state.Pressure > settings.PressureSetpoint + 30)
             {
-                ActiveAlarms.Add(new AlarmInfo
+                AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.PressureTooHigh,
                     Severity = AlarmSeverity.Warning,
@@ -52,7 +55,7 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (state.Pressure < 5)
             {
-                ActiveAlarms.Add(new AlarmInfo
+                AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.PressureTooLow,
                     Severity = AlarmSeverity.Critical,
@@ -62,12 +65,34 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (state.IsCompleted)
             {
-                ActiveAlarms.Add(new AlarmInfo
+                AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.ProcessCompleted,
                     Severity = AlarmSeverity.Info,
                     Message = "Drying process completed."
                 });
+            }
+            UpdateHistoryStatus();
+        }
+        private void AddAlarm(AlarmInfo alarm)
+        {
+            ActiveAlarms.Add(alarm);
+
+            bool alreadyInHistory = AlarmHistory.Any(a =>
+                a.Type == alarm.Type &&
+                a.IsActive);
+
+            if (!alreadyInHistory)
+            {
+                AlarmHistory.Insert(0, alarm);
+            }
+        }
+        private void UpdateHistoryStatus()
+        {
+            foreach (var historyAlarm in AlarmHistory)
+            {
+                bool stillActive = ActiveAlarms.Any(a => a.Type == historyAlarm.Type);
+                historyAlarm.IsActive = stillActive;
             }
         }
     }

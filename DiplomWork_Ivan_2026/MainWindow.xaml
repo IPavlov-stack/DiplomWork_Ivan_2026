@@ -1,10 +1,14 @@
 ﻿<Window x:Class="DiplomWork_Ivan_2026.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         Title="SCADA - Vacuum Dryer"
-        Height="700"
-        Width="1100"
-        Background="#1E1E1E">
+        Width="1600"
+        Height="900"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        Background="#878787">
 
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
@@ -118,6 +122,30 @@
                             Background="#B71C1C"
                             Foreground="White"
                             Click="StopButton_Click"/>
+                    <Button x:Name="ShowTrendsButton"
+                            Content="TRENDS"
+                            Height="42"
+                            FontWeight="Bold"
+                            Background="#1565C0"
+                            Foreground="White"
+                            Margin="0,10,0,0"
+                            Click="ShowTrendsButton_Click"/>
+                    <Button x:Name="ShowAlarmsButton"
+                            Content="ALARMS"
+                            Height="42"
+                            FontWeight="Bold"
+                            Background="#6A1B9A"
+                            Foreground="White"
+                            Margin="0,10,0,0"
+                            Click="ShowAlarmsButton_Click"/>
+                    <Button x:Name="ExitButton"
+                            Content="EXIT"
+                            Height="42"
+                            FontWeight="Bold"
+                            Background="#424242"
+                            Foreground="White"
+                            Margin="0,10,0,0"
+                            Click="ExitButton_Click"/>
 
                 </StackPanel>
             </ScrollViewer>
@@ -230,7 +258,7 @@
                           X1="0"
                           Y1="0"
                           X2="45"
-                          Y2="-55"
+                          Y2="0"
                           Stroke="#4FC3F7"
                           StrokeThickness="6"/>
 
@@ -276,7 +304,7 @@
                     <Border Canvas.Left="330"
                             Canvas.Top="365"
                             Width="190"
-                            Height="95"
+                            Height="115"
                             Background="#303030"
                             BorderBrush="#666"
                             BorderThickness="1"
@@ -297,6 +325,10 @@
                                        FontSize="14"/>
                             <TextBlock x:Name="AirHumidityTextBlock"
                                        Text="Air Humidity: 0 %"
+                                       Foreground="White"
+                                       FontSize="14"/>
+                            <TextBlock x:Name="TargetMoistureTextBlock"
+                                       Text="Target Moisture: 0 %"
                                        Foreground="White"
                                        FontSize="14"/>
                         </StackPanel>
@@ -352,9 +384,9 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.2*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1.5*"/>
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
@@ -381,7 +413,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Process"
+                        <TextBlock Text="Trends"
                                    Foreground="White"
                                    FontSize="18"
                                    FontWeight="Bold"
@@ -391,6 +423,14 @@
                                    Text="Time: 0 s"
                                    Foreground="White"
                                    FontSize="16"/>
+
+                        <TextBlock x:Name="TrendPointsTextBlock"
+                                   Text="Trend points: 0"
+                                   Foreground="White"
+                                   FontSize="16"
+                                   Margin="0,0,0,8"/>
+
+                     
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
@@ -401,10 +441,18 @@
                                    Margin="0,0,0,10"/>
 
                         <TextBlock x:Name="AlarmsTextBlock"
-                                     Text="No active alarms"
-                                     Foreground="LightGreen"
-                                     TextWrapping="Wrap"
-                                     FontSize="15"/>
+                                   Text="No active alarms"
+                                   Foreground="LightGreen"
+                                   TextWrapping="Wrap"
+                                   FontSize="15"
+                                   Margin="0,0,0,10"/>
+
+                        <TextBlock Text="Alarm History"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontSize="15"
+                                   Margin="0,5,0,5"/>
+
                     </StackPanel>
                 </Grid>
             </Border>
