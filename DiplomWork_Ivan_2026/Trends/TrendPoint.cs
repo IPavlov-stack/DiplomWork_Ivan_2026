@@ -5,7 +5,7 @@
         public double Time { get; set; }
 
         // Temperature group
-        public double Temperature { get; set; }              // Chamber temperature
+        public double Temperature { get; set; }                 // Chamber temperature
         public double MaterialTemperature { get; set; }
         public double TemperatureSetpoint { get; set; }
 
