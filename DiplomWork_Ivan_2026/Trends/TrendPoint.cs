@@ -7,5 +7,6 @@
         public double Pressure { get; set; }
         public double MaterialMoisture { get; set; }
         public double AirHumidity { get; set; }
+        public double DryingRate { get; set; }
     }
 }

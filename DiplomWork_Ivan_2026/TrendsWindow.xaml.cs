@@ -66,6 +66,14 @@ namespace DiplomWork_Ivan_2026
                 _trendBuffer.Points.Select(p => p.Time).ToList(),
                 _trendBuffer.Points.Select(p => p.MaterialMoisture).ToList(),
                 Brushes.LimeGreen);
+
+            DrawLineChart(
+                DryingRateCanvas,
+                _trendBuffer.Points.Select(p => p.Time).ToList(),
+                _trendBuffer.Points.Select(p => p.DryingRate).ToList(),
+                Brushes.Gold);
+
+            UpdateCurrentValues();
         }
 
         private void DrawLineChart(Canvas canvas, List<double> xValues, List<double> yValues, Brush lineBrush)
@@ -80,7 +88,7 @@ namespace DiplomWork_Ivan_2026
 
             double marginLeft = 50;
             double marginRight = 20;
-            double marginTop = 20;
+            double marginTop = 25;
             double marginBottom = 35;
 
             double chartWidth = width - marginLeft - marginRight;
@@ -121,8 +129,6 @@ namespace DiplomWork_Ivan_2026
             }
 
             canvas.Children.Add(polyline);
-
-            DrawLastValue(canvas, yValues.Last(), lineBrush);
         }
 
         private void DrawAxes(
@@ -192,21 +198,23 @@ namespace DiplomWork_Ivan_2026
             Canvas.SetTop(timeLabel, height - 25);
             canvas.Children.Add(timeLabel);
         }
-
-        private void DrawLastValue(Canvas canvas, double value, Brush brush)
+        private void UpdateCurrentValues()
         {
-            TextBlock valueText = new TextBlock
+            if (_trendBuffer.Points.Count == 0)
             {
-                Text = $"Current: {value:F1}",
-                Foreground = brush,
-                FontSize = 14,
-                FontWeight = FontWeights.Bold
-            };
+                TemperatureCurrentTextBlock.Text = "Current: 0.0";
+                PressureCurrentTextBlock.Text = "Current: 0.0";
+                MoistureCurrentTextBlock.Text = "Current: 0.0";
+                DryingRateCurrentTextBlock.Text = "Current: 0.0";
+                return;
+            }
 
-            Canvas.SetRight(valueText, 20);
-            Canvas.SetTop(valueText, 10);
+            var last = _trendBuffer.Points.Last();
 
-            canvas.Children.Add(valueText);
+            TemperatureCurrentTextBlock.Text = $"Current: {last.Temperature:F1}";
+            PressureCurrentTextBlock.Text = $"Current: {last.Pressure:F1}";
+            MoistureCurrentTextBlock.Text = $"Current: {last.MaterialMoisture:F1}";
+            DryingRateCurrentTextBlock.Text = $"Current: {last.DryingRate:F1}";
         }
     }
 }

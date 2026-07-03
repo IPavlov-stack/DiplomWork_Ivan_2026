@@ -21,7 +21,8 @@ namespace DiplomWork_Ivan_2026.Trends
                 Temperature = state.Temperature,
                 Pressure = state.Pressure,
                 MaterialMoisture = state.MaterialMoisture,
-                AirHumidity = state.AirHumidity
+                AirHumidity = state.AirHumidity,
+                DryingRate = state.DryingRate * 60.0
             });
 
             if (Points.Count > _maxPoints)

@@ -8,7 +8,7 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         WindowStyle="None"
-        Background="#878787">
+        Background="#595959">
 
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
@@ -36,7 +36,8 @@
                     <TextBlock Text="Material:" Foreground="White"/>
                     <ComboBox x:Name="MaterialComboBox"
                               Height="30"
-                              Margin="0,0,0,10"/>
+                              Margin="0,0,0,10"
+                              SelectionChanged="MaterialComboBox_SelectionChanged"/>
 
                     <TextBlock Text="Temperature Setpoint [°C]:"
                                Foreground="White"/>
@@ -304,11 +305,11 @@
                     <Border Canvas.Left="330"
                             Canvas.Top="365"
                             Width="190"
-                            Height="115"
+                            Height="198"
                             Background="#303030"
                             BorderBrush="#666"
                             BorderThickness="1"
-                            Padding="8">
+                            Padding="8" HorizontalAlignment="Center" VerticalAlignment="Top">
 
                         <StackPanel>
                             <TextBlock x:Name="TemperatureTextBlock"
@@ -329,6 +330,24 @@
                                        FontSize="14"/>
                             <TextBlock x:Name="TargetMoistureTextBlock"
                                        Text="Target Moisture: 0 %"
+                                       Foreground="White"
+                                       FontSize="14"/>
+                            <TextBlock x:Name="MaxTemperatureTextBlock"
+                                       Text="Max Temperature: 0 °C"
+                                       Foreground="LightGray"
+                                       FontSize="14"/>
+                            <TextBlock x:Name="VacuumLevelTextBlock"
+                                       Text="Vacuum Level: 0 %"
+                                       Foreground="White"
+                                       FontSize="14"/>
+
+                            <TextBlock x:Name="AirFlowRateTextBlock"
+                                       Text="Air Flow: 0 m³/h"
+                                       Foreground="White"
+                                       FontSize="14"/>
+
+                            <TextBlock x:Name="DryingRateTextBlock"
+                                       Text="Drying Rate: 0 %/min"
                                        Foreground="White"
                                        FontSize="14"/>
                         </StackPanel>
@@ -430,7 +449,7 @@
                                    FontSize="16"
                                    Margin="0,0,0,8"/>
 
-                     
+
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">

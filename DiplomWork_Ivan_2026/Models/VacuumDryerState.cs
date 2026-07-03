@@ -16,6 +16,9 @@ namespace DiplomWork_Ivan_2026.Models
         public double HeaterPower { get; set; } = 0.0;           // %
         public double FanSpeed { get; set; } = 0.0;              // %
         public double VacuumPumpPower { get; set; } = 0.0;       // %
+        public double VacuumLevel { get; set; } = 0.0;           // [%]
+        public double AirFlowRate { get; set; } = 0.0;           // [m³/h]
+        public double DryingRate { get; set; } = 0.0;            // [%/s]
 
         public double ElapsedTime { get; set; } = 0.0;           // seconds
         public bool IsCompleted { get; set; } = false;

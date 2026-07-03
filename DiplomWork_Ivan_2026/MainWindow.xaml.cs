@@ -145,6 +145,11 @@ namespace DiplomWork_Ivan_2026
             alarmsWindow.Show();
         }
 
+        private void MaterialComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            UpdateUi();
+        }
+
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show(
@@ -220,6 +225,33 @@ namespace DiplomWork_Ivan_2026
             TimeTextBlock.Text = $"Time: {state.ElapsedTime:F0} s";
             TrendPointsTextBlock.Text = $"Trend points: {_trendBuffer.Points.Count}";
 
+            VacuumLevelTextBlock.Text = $"Vacuum Level: {state.VacuumLevel:F1} %";
+
+            AirFlowRateTextBlock.Text = $"Air Flow: {state.AirFlowRate:F1} m³/h";
+
+            DryingRateTextBlock.Text =  $"Drying Rate: {state.DryingRate * 60.0:F2} %/min";
+
+            if (_process.SelectedMaterial != null)
+            {
+                TargetMoistureTextBlock.Text =
+                    $"Target Moisture: {_process.SelectedMaterial.TargetMoisture:F1} %";
+
+                MaxTemperatureTextBlock.Text =
+                    $"Max Temperature: {_process.SelectedMaterial.MaxTemperature:F1} °C";
+            }
+            else if (MaterialComboBox.SelectedItem is DryingMaterial selectedMaterial)
+            {
+                TargetMoistureTextBlock.Text =
+                    $"Target Moisture: {selectedMaterial.TargetMoisture:F1} %";
+
+                MaxTemperatureTextBlock.Text =
+                    $"Max Temperature: {selectedMaterial.MaxTemperature:F1} °C";
+            }
+            else
+            {
+                TargetMoistureTextBlock.Text = "Target Moisture: -";
+                MaxTemperatureTextBlock.Text = "Max Temperature: -";
+            }
             if (_alarmService.ActiveAlarms.Count == 0)
             {
                 AlarmsTextBlock.Text = "No active alarms";

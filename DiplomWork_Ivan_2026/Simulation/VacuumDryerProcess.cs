@@ -12,12 +12,12 @@ namespace DiplomWork_Ivan_2026.Simulation
     public class VacuumDryerProcess
     {
         public VacuumDryerState State { get; private set; } = new VacuumDryerState();
-
         public Heater Heater { get; } = new Heater();
         public VacuumPump Pump { get; } = new VacuumPump();
         public Fan Fan { get; } = new Fan();
-
         public DryingMaterial? SelectedMaterial { get; private set; }
+
+        private const double MaxAirFlowRate = 200.0; // m³/h
 
         public void LoadMaterial(DryingMaterial material)
         {
@@ -43,11 +43,14 @@ namespace DiplomWork_Ivan_2026.Simulation
 
             UpdateTemperature(deltaTime, settings);
             UpdatePressure(deltaTime, settings);
-            UpdateMoisture(deltaTime);
 
             State.HeaterPower = Heater.Power;
             State.VacuumPumpPower = Pump.Power;
             State.FanSpeed = Fan.Speed;
+
+            UpdateCalculatedValues(settings);
+            UpdateMoisture(deltaTime);
+
 
             if (State.MaterialMoisture <= SelectedMaterial.TargetMoisture)
             {
@@ -96,8 +99,9 @@ namespace DiplomWork_Ivan_2026.Simulation
                 temperatureFactor *
                 (0.5 + vacuumFactor) *
                 (0.5 + fanFactor) *
-                0.05;
+                0.8;
 
+            State.DryingRate = dryingRate;
             State.MaterialMoisture -= dryingRate * deltaTime;
 
             if (State.MaterialMoisture < 0)
@@ -107,6 +111,16 @@ namespace DiplomWork_Ivan_2026.Simulation
             State.AirHumidity -= fanFactor * 0.2 * deltaTime;
 
             State.AirHumidity = Math.Clamp(State.AirHumidity, 0.0, 100.0);
+        }
+        private void UpdateCalculatedValues(ProcessSettings settings)
+        {
+            State.VacuumLevel =
+                (settings.AmbientPressure - State.Pressure) / settings.AmbientPressure * 100.0;
+
+            State.VacuumLevel = Math.Clamp(State.VacuumLevel, 0.0, 100.0);
+
+            State.AirFlowRate =
+                State.FanSpeed / 100.0 * MaxAirFlowRate;
         }
     }
 }
