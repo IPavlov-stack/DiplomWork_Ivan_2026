@@ -120,22 +120,72 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <Button x:Name="StartButton"
-                            Content="START"
-                            Height="42"
-                            FontWeight="Bold"
-                            Background="#2E7D32"
-                            Foreground="White"
-                            Margin="0,0,0,10"
-                            Click="StartButton_Click"/>
+                    <!-- START / STOP buttons on one row -->
+                    <Grid Margin="0,15,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Button x:Name="StopButton"
-                            Content="STOP"
-                            Height="42"
-                            FontWeight="Bold"
-                            Background="#B71C1C"
-                            Foreground="White"
-                            Click="StopButton_Click"/>
+                        <Button x:Name="StartButton"
+                                Grid.Column="0"
+                                Content="START"
+                                Height="42"
+                                FontWeight="Bold"
+                                Margin="0,0,5,0"
+                                Click="StartButton_Click">
+
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#2E7D32"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="#1B5E20"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="2">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Background" Value="#111111"/>
+                                            <Setter Property="Foreground" Value="#777777"/>
+                                            <Setter Property="BorderBrush" Value="#333333"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button x:Name="StopButton"
+                                Grid.Column="1"
+                                Content="STOP"
+                                Height="42"
+                                FontWeight="Bold"
+                                Background="#C62828"
+                                Foreground="White"
+                                Margin="5,0,0,0"
+                                Click="StopButton_Click"/>
+                    </Grid>
+
+                    <!-- RESET button under START / STOP -->
+                    <Button x:Name="ResetButton"
+                        Content="RESTART"
+                        Height="42"
+                        FontWeight="Bold"
+                        Background="#F57C00"
+                        Foreground="White"
+                        Margin="0,10,0,0"
+                        Click="ResetButton_Click"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -255,17 +305,17 @@
 
                     <!-- Vacuum pump -->
                     <Ellipse Canvas.Left="620"
-                             Canvas.Top="175"
+                             Canvas.Top="165"
                              Width="110"
                              Height="110"
                              Fill="#444"
                              Stroke="#AAAAAA"
-                             StrokeThickness="2"/>
+                             StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                     <TextBlock Canvas.Left="652"
-                               Canvas.Top="215"
+                               Canvas.Top="205"
                                Text="PUMP"
                                Foreground="White"
-                               FontWeight="Bold"/>
+                               FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
                     <!-- Pump pipe -->
                     <Line Canvas.Left="520"
@@ -275,21 +325,21 @@
                           X2="100"
                           Y2="0"
                           Stroke="#4FC3F7"
-                          StrokeThickness="8"/>
+                          StrokeThickness="8" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
                     <!-- Exhaust line -->
                     <Line Canvas.Left="730"
-                          Canvas.Top="230"
+                          Canvas.Top="220"
                           X1="0"
                           Y1="0"
                           X2="80"
                           Y2="0"
                           Stroke="#4FC3F7"
-                          StrokeThickness="6"/>
+                          StrokeThickness="6" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                     <TextBlock Canvas.Left="760"
-                               Canvas.Top="200"
+                               Canvas.Top="190"
                                Text="Vacuum line"
-                               Foreground="LightGray"/>
+                               Foreground="LightGray" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
                     <!-- Sensor labels near chamber -->
                     <Border Canvas.Left="313"
@@ -350,15 +400,15 @@
 
                     <Ellipse x:Name="PumpLamp"
                              Canvas.Left="660"
-                             Canvas.Top="300"
+                             Canvas.Top="290"
                              Width="22"
                              Height="22"
                              Fill="Gray"
-                             Stroke="White"/>
+                             Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                     <TextBlock Canvas.Left="690"
-                               Canvas.Top="300"
+                               Canvas.Top="290"
                                Text="Pump"
-                               Foreground="White"/>
+                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
                 </Canvas>
             </Border>

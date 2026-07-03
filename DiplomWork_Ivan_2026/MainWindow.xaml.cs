@@ -32,6 +32,7 @@ namespace DiplomWork_Ivan_2026
         private readonly List<double> _moistureValues = new List<double>();
 
         private bool _isRunning = false;
+        private bool _processStarted = false;
 
         public ISeries[] ProcessSeries { get; set; }
         public Axis[] XAxes { get; set; }
@@ -100,21 +101,22 @@ namespace DiplomWork_Ivan_2026
 
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            if (MaterialComboBox.SelectedItem is not DryingMaterial material)
+            if (!UpdateSettingsFromUi())
                 return;
 
-            double.TryParse(TemperatureSetpointTextBox.Text, out double tempSetpoint);
-            double.TryParse(PressureSetpointTextBox.Text, out double pressureSetpoint);
+            if (!_processStarted)
+            {
+                if (MaterialComboBox.SelectedItem is not DryingMaterial material)
+                {
+                    MessageBox.Show("Please select a material.");
+                    return;
+                }
 
-            _settings.TemperatureSetpoint = tempSetpoint;
-            _settings.PressureSetpoint = pressureSetpoint;
+                _process.LoadMaterial(material);
+                _trendBuffer.Clear();
 
-            _process.LoadMaterial(material);
-            _trendBuffer.Clear();
-            _temperatureValues.Clear();
-            _pressureValues.Clear();
-            _moistureValues.Clear();
-            _process.Fan.TurnOn();
+                _processStarted = true;
+            }
 
             _isRunning = true;
             _timer.Start();
@@ -130,6 +132,30 @@ namespace DiplomWork_Ivan_2026
             _process.Heater.TurnOff();
             _process.Pump.TurnOff();
             _process.Fan.TurnOff();
+
+            _process.State.HeaterPower = 0;
+            _process.State.VacuumPumpPower = 0;
+            _process.State.FanSpeed = 0;
+
+
+            UpdateUi();
+        }
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            _timer.Stop();
+            _isRunning = false;
+            _processStarted = false;
+
+            _process.Heater.TurnOff();
+            _process.Pump.TurnOff();
+            _process.Fan.TurnOff();
+
+            if (MaterialComboBox.SelectedItem is DryingMaterial material)
+            {
+                _process.LoadMaterial(material);
+            }
+
+            _trendBuffer.Clear();
 
             UpdateUi();
         }
@@ -180,6 +206,13 @@ namespace DiplomWork_Ivan_2026
             if (!_isRunning)
                 return;
 
+            if (!UpdateSettingsFromUi())
+            {
+                _isRunning = false;
+                _timer.Stop();
+                return;
+            }
+
             bool isAutoMode = OperationModeComboBox.SelectedIndex == 0;
 
             if (isAutoMode)
@@ -197,13 +230,14 @@ namespace DiplomWork_Ivan_2026
             }
 
             _process.Update(1.0, _settings);
-            _trendBuffer.AddPoint(_process.State);
+            _trendBuffer.AddPoint(_process.State, _settings);
             UpdateChartData();
             _alarmService.CheckAlarms(_process, _settings);
 
             if (_process.State.IsCompleted)
             {
                 _isRunning = false;
+                _processStarted = false;
                 _timer.Stop();
             }
 
@@ -233,7 +267,6 @@ namespace DiplomWork_Ivan_2026
             TemperatureTextBlock.Text = $"Chamber Temperature: {state.Temperature:F1} °C";
             MaterialTemperatureTextBlock.Text = $"Material Temperature: {state.MaterialTemperature:F1} °C";
             MoistureTextBlock.Text = $"Material Moisture: {state.MaterialMoisture:F1} %";
-            //AirHumidityTextBlock.Text = $"Air Humidity: {state.AirHumidity:F1} %";
             PressureTextBlock.Text = $"Pressure: {state.Pressure:F1} kPa";
 
             HeaterTextBlock.Text = $"Heater: {state.HeaterPower:F0} %";
@@ -241,52 +274,27 @@ namespace DiplomWork_Ivan_2026
             FanTextBlock.Text = $"Fan: {state.FanSpeed:F0} %";
 
             TimeTextBlock.Text = $"Time: {state.ElapsedTime:F0} s";
-            //TrendPointsTextBlock.Text = $"Trend points: {_trendBuffer.Points.Count}";
             VacuumLevelTextBlock.Text = $"Vacuum Level: {state.VacuumLevel:F1} %";
-            //AirFlowRateTextBlock.Text = $"Air Flow: {state.AirFlowRate:F1} m³/h";
-            //DryingRateTextBlock.Text =  $"Drying Rate: {state.DryingRate * 60.0:F2} %/min";
             TotalEnergyTextBlock.Text = $"Total Energy: {state.TotalEnergyKWh:F3} kWh";
-            //EvaporatedWaterTextBlock.Text = $"Evaporated Water: {state.EvaporatedWaterKg:F2} kg";
-            //EfficiencyTextBlock.Text = $"Efficiency: {state.EfficiencyKgPerKWh:F2} kg/kWh";
 
-            //if (_process.SelectedMaterial != null)
-            //{
-            //    TargetMoistureTextBlock.Text =
-            //        $"Target Moisture: {_process.SelectedMaterial.TargetMoisture:F1} %";
+            UpdateAlarmsUi();
 
-            //    MaxTemperatureTextBlock.Text =
-            //        $"Max Temperature: {_process.SelectedMaterial.MaxTemperature:F1} °C";
-            //}
-            //else if (MaterialComboBox.SelectedItem is DryingMaterial selectedMaterial)
-            //{
-            //    TargetMoistureTextBlock.Text =
-            //        $"Target Moisture: {selectedMaterial.TargetMoisture:F1} %";
-
-            //    MaxTemperatureTextBlock.Text =
-            //        $"Max Temperature: {selectedMaterial.MaxTemperature:F1} °C";
-            //}
-            //else
-            //{
-            //    TargetMoistureTextBlock.Text = "Target Moisture: -";
-            //    MaxTemperatureTextBlock.Text = "Max Temperature: -";
-            //}
-            if (_alarmService.ActiveAlarms.Count == 0)
+            // START / RESUME / RUNNING button state
+            if (_isRunning)
             {
-                AlarmsTextBlock.Text = "No active alarms";
-                AlarmsTextBlock.Foreground = Brushes.LightGreen;
+                StartButton.Content = "RUNNING";
+                StartButton.IsEnabled = false;
+            }
+            else if (_processStarted)
+            {
+                StartButton.Content = "RESUME";
+                StartButton.IsEnabled = true;
             }
             else
             {
-                AlarmsTextBlock.Text = string.Join("\n", _alarmService.ActiveAlarms.Select(a => a.Message));
-
-                bool hasCritical = _alarmService.ActiveAlarms.Any(a => a.Severity == AlarmSeverity.Critical);
-
-                AlarmsTextBlock.Foreground = hasCritical
-                    ? Brushes.OrangeRed
-                    : Brushes.Gold;
+                StartButton.Content = "START";
+                StartButton.IsEnabled = true;
             }
-
-            UpdateAlarmsUi();
         }
         private void OperationModeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -408,6 +416,25 @@ namespace DiplomWork_Ivan_2026
             }
 
             ApplyDryingMode(selectedMode);
+        }
+        private bool UpdateSettingsFromUi()
+        {
+            if (!double.TryParse(TemperatureSetpointTextBox.Text, out double temperatureSetpoint))
+            {
+                MessageBox.Show("Invalid temperature setpoint.");
+                return false;
+            }
+
+            if (!double.TryParse(PressureSetpointTextBox.Text, out double pressureSetpoint))
+            {
+                MessageBox.Show("Invalid pressure setpoint.");
+                return false;
+            }
+
+            _settings.TemperatureSetpoint = temperatureSetpoint;
+            _settings.PressureSetpoint = pressureSetpoint;
+
+            return true;
         }
     }
 }

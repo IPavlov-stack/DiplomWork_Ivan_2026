@@ -57,7 +57,7 @@
                     <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="260"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="520"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="Selected trend:"
@@ -73,18 +73,21 @@
                           SelectionChanged="TrendComboBox_SelectionChanged">
                     <ComboBoxItem Content="Temperature"/>
                     <ComboBoxItem Content="Pressure"/>
-                    <ComboBoxItem Content="Material Moisture"/>
+                    <ComboBoxItem Content="Moisture / Humidity"/>
                     <ComboBoxItem Content="Drying Rate"/>
+                    <ComboBoxItem Content="Actuators"/>
+                    <ComboBoxItem Content="Energy"/>
                 </ComboBox>
 
                 <TextBlock x:Name="CurrentValueTextBlock"
                            Grid.Column="3"
                            Text="Current: 0.0"
                            Foreground="White"
-                           FontSize="18"
+                           FontSize="16"
                            FontWeight="Bold"
                            HorizontalAlignment="Right"
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center"
+                           TextWrapping="NoWrap"/>
             </Grid>
         </Border>
 
@@ -110,7 +113,9 @@
 
                 <Canvas x:Name="MainTrendCanvas"
                         Grid.Row="1"
-                        Background="#1E1E1E"/>
+                        Background="#1E1E1E"
+                        MouseMove="MainTrendCanvas_MouseMove"
+                        MouseLeave="MainTrendCanvas_MouseLeave"/>
             </Grid>
         </Border>
     </Grid>

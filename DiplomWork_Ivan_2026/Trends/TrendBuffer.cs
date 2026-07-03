@@ -13,16 +13,38 @@ namespace DiplomWork_Ivan_2026.Trends
             _maxPoints = maxPoints;
         }
 
-        public void AddPoint(VacuumDryerState state)
+        public void AddPoint(VacuumDryerState state, ProcessSettings settings)
         {
             Points.Add(new TrendPoint
             {
                 Time = state.ElapsedTime,
+
+                // Temperature group
                 Temperature = state.Temperature,
+                MaterialTemperature = state.MaterialTemperature,
+                TemperatureSetpoint = settings.TemperatureSetpoint,
+
+                // Pressure group
                 Pressure = state.Pressure,
+                PressureSetpoint = settings.PressureSetpoint,
+                VacuumLevel = state.VacuumLevel,
+
+                // Moisture / humidity group
                 MaterialMoisture = state.MaterialMoisture,
                 AirHumidity = state.AirHumidity,
-                DryingRate = state.DryingRate * 60.0
+
+                // Drying group
+                DryingRate = state.DryingRate * 60.0,
+
+                // Energy group
+                TotalEnergyKWh = state.TotalEnergyKWh,
+                EvaporatedWaterKg = state.EvaporatedWaterKg,
+                EfficiencyKgPerKWh = state.EfficiencyKgPerKWh,
+
+                // Actuator group
+                HeaterPower = state.HeaterPower,
+                PumpPower = state.VacuumPumpPower,
+                FanSpeed = state.FanSpeed
             });
 
             if (Points.Count > _maxPoints)
