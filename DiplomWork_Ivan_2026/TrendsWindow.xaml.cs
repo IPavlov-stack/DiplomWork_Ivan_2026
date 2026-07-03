@@ -1,9 +1,12 @@
-﻿using DiplomWork_Ivan_2026.Trends;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using DiplomWork_Ivan_2026.Trends;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -22,79 +25,109 @@ namespace DiplomWork_Ivan_2026
             _refreshTimer.Tick += RefreshTimer_Tick;
             _refreshTimer.Start();
 
-            DrawTrends();
+            DrawSelectedTrend();
         }
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
-            DrawTrends();
+            DrawSelectedTrend();
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        private void TrendComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Close();
+            if (MainTrendCanvas == null)
+                return;
+
+            DrawSelectedTrend();
         }
-        protected override void OnClosed(EventArgs e)
+
+        private void DrawSelectedTrend()
         {
-            _refreshTimer.Stop();
-            base.OnClosed(e);
-        }
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if (e.Key == System.Windows.Input.Key.Escape)
+            if (_trendBuffer.Points.Count == 0)
             {
-                Close();
+                MainTrendCanvas.Children.Clear();
+                CurrentValueTextBlock.Text = "Current: 0.0";
+                return;
             }
-        }
 
-        private void DrawTrends()
-        {
-            DrawLineChart(
-                TemperatureCanvas,
-                _trendBuffer.Points.Select(p => p.Time).ToList(),
-                _trendBuffer.Points.Select(p => p.Temperature).ToList(),
-                Brushes.OrangeRed);
+            List<double> xValues = _trendBuffer.Points
+                .Select(p => p.Time)
+                .ToList();
 
-            DrawLineChart(
-                PressureCanvas,
-                _trendBuffer.Points.Select(p => p.Time).ToList(),
-                _trendBuffer.Points.Select(p => p.Pressure).ToList(),
-                Brushes.DeepSkyBlue);
+            List<double> yValues;
+            Brush lineBrush;
+            string title;
+            string currentText;
 
-            DrawLineChart(
-                MoistureCanvas,
-                _trendBuffer.Points.Select(p => p.Time).ToList(),
-                _trendBuffer.Points.Select(p => p.MaterialMoisture).ToList(),
-                Brushes.LimeGreen);
+            TrendPoint last = _trendBuffer.Points.Last();
 
-            DrawLineChart(
-                DryingRateCanvas,
-                _trendBuffer.Points.Select(p => p.Time).ToList(),
-                _trendBuffer.Points.Select(p => p.DryingRate).ToList(),
-                Brushes.Gold);
+            switch (TrendComboBox.SelectedIndex)
+            {
+                case 0:
+                    yValues = _trendBuffer.Points.Select(p => p.Temperature).ToList();
+                    lineBrush = Brushes.OrangeRed;
+                    title = "Temperature [°C]";
+                    currentText = $"Current: {last.Temperature:F1} °C";
+                    break;
 
-            UpdateCurrentValues();
+                case 1:
+                    yValues = _trendBuffer.Points.Select(p => p.Pressure).ToList();
+                    lineBrush = Brushes.DeepSkyBlue;
+                    title = "Pressure [kPa]";
+                    currentText = $"Current: {last.Pressure:F1} kPa";
+                    break;
+
+                case 2:
+                    yValues = _trendBuffer.Points.Select(p => p.MaterialMoisture).ToList();
+                    lineBrush = Brushes.LimeGreen;
+                    title = "Material Moisture [%]";
+                    currentText = $"Current: {last.MaterialMoisture:F1} %";
+                    break;
+
+                case 3:
+                    yValues = _trendBuffer.Points.Select(p => p.DryingRate).ToList();
+                    lineBrush = Brushes.Gold;
+                    title = "Drying Rate [%/min]";
+                    currentText = $"Current: {last.DryingRate:F2} %/min";
+                    break;
+
+                default:
+                    yValues = _trendBuffer.Points.Select(p => p.Temperature).ToList();
+                    lineBrush = Brushes.OrangeRed;
+                    title = "Temperature [°C]";
+                    currentText = $"Current: {last.Temperature:F1} °C";
+                    break;
+            }
+
+            ChartTitleTextBlock.Text = title;
+            CurrentValueTextBlock.Text = currentText;
+            CurrentValueTextBlock.Foreground = lineBrush;
+
+            DrawLineChart(MainTrendCanvas, xValues, yValues, lineBrush);
         }
 
         private void DrawLineChart(Canvas canvas, List<double> xValues, List<double> yValues, Brush lineBrush)
         {
             canvas.Children.Clear();
 
+            if (xValues.Count < 2 || yValues.Count < 2)
+                return;
+
             double width = canvas.ActualWidth;
             double height = canvas.ActualHeight;
 
-            if (width <= 0 || height <= 0 || xValues.Count < 2 || yValues.Count < 2)
+            if (width <= 0 || height <= 0)
                 return;
 
-            double marginLeft = 50;
-            double marginRight = 20;
-            double marginTop = 25;
-            double marginBottom = 35;
+            double marginLeft = 70;
+            double marginRight = 30;
+            double marginTop = 30;
+            double marginBottom = 50;
 
-            double chartWidth = width - marginLeft - marginRight;
-            double chartHeight = height - marginTop - marginBottom;
+            double plotWidth = width - marginLeft - marginRight;
+            double plotHeight = height - marginTop - marginBottom;
 
-            if (chartWidth <= 0 || chartHeight <= 0)
+            if (plotWidth <= 0 || plotHeight <= 0)
                 return;
 
             double minX = xValues.Min();
@@ -103,54 +136,51 @@ namespace DiplomWork_Ivan_2026
             double minY = yValues.Min();
             double maxY = yValues.Max();
 
-            if (Math.Abs(maxX - minX) < 0.001)
+            if (Math.Abs(maxX - minX) < 0.0001)
                 maxX = minX + 1;
 
-            if (Math.Abs(maxY - minY) < 0.001)
+            if (Math.Abs(maxY - minY) < 0.0001)
             {
-                maxY += 1;
-                minY -= 1;
+                maxY = minY + 1;
+                minY = minY - 1;
             }
 
-            DrawAxes(canvas, width, height, marginLeft, marginRight, marginTop, marginBottom, minY, maxY);
+            DrawAxes(canvas, marginLeft, marginTop, plotWidth, plotHeight, minY, maxY, minX, maxX);
 
-            Polyline polyline = new Polyline
+            Polyline line = new Polyline
             {
                 Stroke = lineBrush,
-                StrokeThickness = 2
+                StrokeThickness = 3
             };
 
             for (int i = 0; i < xValues.Count; i++)
             {
-                double x = marginLeft + ((xValues[i] - minX) / (maxX - minX)) * chartWidth;
-                double y = marginTop + (1 - ((yValues[i] - minY) / (maxY - minY))) * chartHeight;
+                double x = marginLeft + (xValues[i] - minX) / (maxX - minX) * plotWidth;
+                double y = marginTop + plotHeight - (yValues[i] - minY) / (maxY - minY) * plotHeight;
 
-                polyline.Points.Add(new Point(x, y));
+                line.Points.Add(new Point(x, y));
             }
 
-            canvas.Children.Add(polyline);
+            canvas.Children.Add(line);
         }
 
         private void DrawAxes(
             Canvas canvas,
-            double width,
-            double height,
             double marginLeft,
-            double marginRight,
             double marginTop,
-            double marginBottom,
+            double plotWidth,
+            double plotHeight,
             double minY,
-            double maxY)
+            double maxY,
+            double minX,
+            double maxX)
         {
-            double xAxisY = height - marginBottom;
-            double yAxisX = marginLeft;
-
             Line yAxis = new Line
             {
-                X1 = yAxisX,
+                X1 = marginLeft,
                 Y1 = marginTop,
-                X2 = yAxisX,
-                Y2 = xAxisY,
+                X2 = marginLeft,
+                Y2 = marginTop + plotHeight,
                 Stroke = Brushes.Gray,
                 StrokeThickness = 1
             };
@@ -158,9 +188,9 @@ namespace DiplomWork_Ivan_2026
             Line xAxis = new Line
             {
                 X1 = marginLeft,
-                Y1 = xAxisY,
-                X2 = width - marginRight,
-                Y2 = xAxisY,
+                Y1 = marginTop + plotHeight,
+                X2 = marginLeft + plotWidth,
+                Y2 = marginTop + plotHeight,
                 Stroke = Brushes.Gray,
                 StrokeThickness = 1
             };
@@ -168,53 +198,79 @@ namespace DiplomWork_Ivan_2026
             canvas.Children.Add(yAxis);
             canvas.Children.Add(xAxis);
 
-            TextBlock maxLabel = new TextBlock
+            TextBlock maxYText = new TextBlock
             {
                 Text = maxY.ToString("F1"),
-                Foreground = Brushes.LightGray,
-                FontSize = 12
+                Foreground = Brushes.White,
+                FontSize = 13
             };
-            Canvas.SetLeft(maxLabel, 5);
-            Canvas.SetTop(maxLabel, marginTop - 8);
-            canvas.Children.Add(maxLabel);
 
-            TextBlock minLabel = new TextBlock
+            Canvas.SetLeft(maxYText, 10);
+            Canvas.SetTop(maxYText, marginTop - 8);
+            canvas.Children.Add(maxYText);
+
+            TextBlock minYText = new TextBlock
             {
                 Text = minY.ToString("F1"),
-                Foreground = Brushes.LightGray,
-                FontSize = 12
+                Foreground = Brushes.White,
+                FontSize = 13
             };
-            Canvas.SetLeft(minLabel, 5);
-            Canvas.SetTop(minLabel, xAxisY - 12);
-            canvas.Children.Add(minLabel);
 
-            TextBlock timeLabel = new TextBlock
+            Canvas.SetLeft(minYText, 10);
+            Canvas.SetTop(minYText, marginTop + plotHeight - 8);
+            canvas.Children.Add(minYText);
+
+            TextBlock timeText = new TextBlock
             {
                 Text = "Time [s]",
-                Foreground = Brushes.LightGray,
+                Foreground = Brushes.White,
+                FontSize = 14
+            };
+
+            Canvas.SetLeft(timeText, marginLeft + plotWidth / 2 - 35);
+            Canvas.SetTop(timeText, marginTop + plotHeight + 20);
+            canvas.Children.Add(timeText);
+
+            TextBlock startTimeText = new TextBlock
+            {
+                Text = minX.ToString("F0"),
+                Foreground = Brushes.White,
                 FontSize = 12
             };
-            Canvas.SetLeft(timeLabel, width / 2 - 25);
-            Canvas.SetTop(timeLabel, height - 25);
-            canvas.Children.Add(timeLabel);
-        }
-        private void UpdateCurrentValues()
-        {
-            if (_trendBuffer.Points.Count == 0)
+
+            Canvas.SetLeft(startTimeText, marginLeft - 5);
+            Canvas.SetTop(startTimeText, marginTop + plotHeight + 5);
+            canvas.Children.Add(startTimeText);
+
+            TextBlock endTimeText = new TextBlock
             {
-                TemperatureCurrentTextBlock.Text = "Current: 0.0";
-                PressureCurrentTextBlock.Text = "Current: 0.0";
-                MoistureCurrentTextBlock.Text = "Current: 0.0";
-                DryingRateCurrentTextBlock.Text = "Current: 0.0";
-                return;
+                Text = maxX.ToString("F0"),
+                Foreground = Brushes.White,
+                FontSize = 12
+            };
+
+            Canvas.SetLeft(endTimeText, marginLeft + plotWidth - 20);
+            Canvas.SetTop(endTimeText, marginTop + plotHeight + 5);
+            canvas.Children.Add(endTimeText);
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                Close();
             }
+        }
 
-            var last = _trendBuffer.Points.Last();
-
-            TemperatureCurrentTextBlock.Text = $"Current: {last.Temperature:F1}";
-            PressureCurrentTextBlock.Text = $"Current: {last.Pressure:F1}";
-            MoistureCurrentTextBlock.Text = $"Current: {last.MaterialMoisture:F1}";
-            DryingRateCurrentTextBlock.Text = $"Current: {last.DryingRate:F1}";
+        protected override void OnClosed(EventArgs e)
+        {
+            _refreshTimer.Stop();
+            base.OnClosed(e);
         }
     }
 }

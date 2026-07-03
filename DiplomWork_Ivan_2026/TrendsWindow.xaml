@@ -7,19 +7,18 @@
         WindowState="Maximized"
         ResizeMode="NoResize"
         WindowStyle="None"
-        KeyDown="Window_KeyDown"
         Background="#595959"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        KeyDown="Window_KeyDown">
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -27,179 +26,92 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="Vacuum Dryer Process Trends"
-               Grid.Column="0"
-               Foreground="White"
-               FontSize="26"
-               FontWeight="Bold"
-               VerticalAlignment="Center"/>
+                       Foreground="White"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"/>
 
             <Button x:Name="CloseButton"
-            Grid.Column="1"
-            Content="CLOSE"
-            Width="125"
-            Height="45"
-            Background="#B71C1C"
-            Foreground="White"
-            FontWeight="Bold"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Click="CloseButton_Click"/>
+                    Grid.Column="1"
+                    Content="CLOSE"
+                    Width="100"
+                    Height="40"
+                    Background="#B71C1C"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Click="CloseButton_Click"/>
         </Grid>
 
+        <!-- Controls -->
         <Border Grid.Row="1"
-        Background="#252525"
-        BorderBrush="#555"
-        BorderThickness="1"
-        Margin="0,5,0,5"
-        Padding="10">
+                Background="#252525"
+                BorderBrush="#555"
+                BorderThickness="1"
+                Padding="12"
+                Margin="0,0,0,10">
+
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="260"/>
+                </Grid.ColumnDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <TextBlock Text="Selected trend:"
+                           Foreground="White"
+                           FontSize="16"
+                           VerticalAlignment="Center"/>
 
-                    <TextBlock Text="Temperature [°C]"
-                       Foreground="White"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
+                <ComboBox x:Name="TrendComboBox"
+                          Grid.Column="1"
+                          Height="32"
+                          FontSize="15"
+                          SelectedIndex="0"
+                          SelectionChanged="TrendComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Temperature"/>
+                    <ComboBoxItem Content="Pressure"/>
+                    <ComboBoxItem Content="Material Moisture"/>
+                    <ComboBoxItem Content="Drying Rate"/>
+                </ComboBox>
 
-                    <TextBlock x:Name="TemperatureCurrentTextBlock"
-                       Grid.Column="1"
-                       Text="Current: 0.0"
-                       Foreground="OrangeRed"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-                </Grid>
-
-                <Canvas x:Name="TemperatureCanvas"
-                Grid.Row="1"
-                Background="#1E1E1E"/>
+                <TextBlock x:Name="CurrentValueTextBlock"
+                           Grid.Column="3"
+                           Text="Current: 0.0"
+                           Foreground="White"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
+        <!-- Main chart -->
         <Border Grid.Row="2"
-        Background="#252525"
-        BorderBrush="#555"
-        BorderThickness="1"
-        Margin="0,5,0,5"
-        Padding="10">
+                Background="#252525"
+                BorderBrush="#777"
+                BorderThickness="1"
+                Padding="15">
+
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="40"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <TextBlock x:Name="ChartTitleTextBlock"
+                           Text="Temperature [°C]"
+                           Foreground="White"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
 
-                    <TextBlock Text="Pressure [kPa]"
-                       Foreground="White"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-
-                    <TextBlock x:Name="PressureCurrentTextBlock"
-                       Grid.Column="1"
-                       Text="Current: 0.0"
-                       Foreground="DeepSkyBlue"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-                </Grid>
-
-                <Canvas x:Name="PressureCanvas"
-                Grid.Row="1"
-                Background="#1E1E1E"/>
+                <Canvas x:Name="MainTrendCanvas"
+                        Grid.Row="1"
+                        Background="#1E1E1E"/>
             </Grid>
         </Border>
-
-        <Border Grid.Row="3"
-        Background="#252525"
-        BorderBrush="#555"
-        BorderThickness="1"
-        Margin="0,5,0,5"
-        Padding="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Material Moisture [%]"
-                       Foreground="White"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-
-                    <TextBlock x:Name="MoistureCurrentTextBlock"
-                       Grid.Column="1"
-                       Text="Current: 0.0"
-                       Foreground="LimeGreen"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-                </Grid>
-
-                <Canvas x:Name="MoistureCanvas"
-                Grid.Row="1"
-                Background="#1E1E1E"/>
-            </Grid>
-        </Border>
-        <Border Grid.Row="4"
-        Background="#252525"
-        BorderBrush="#555"
-        BorderThickness="1"
-        Margin="0,5,0,0"
-        Padding="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Drying Rate [%/min]"
-                       Foreground="White"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-
-                    <TextBlock x:Name="DryingRateCurrentTextBlock"
-                       Grid.Column="1"
-                       Text="Current: 0.0"
-                       Foreground="Gold"
-                       FontSize="16"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-                </Grid>
-
-                <Canvas x:Name="DryingRateCanvas"
-                Grid.Row="1"
-                Background="#1E1E1E"/>
-            </Grid>
-        </Border>
-
     </Grid>
 </Window>

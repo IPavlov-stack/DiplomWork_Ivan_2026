@@ -13,8 +13,8 @@ namespace DiplomWork_Ivan_2026.Models
         public double InitialMoisture { get; set; }      // [%]
         public double TargetMoisture { get; set; }       // [%]
         public double MaxTemperature { get; set; }       // [°C]
-        public double DryingCoefficient { get; set; }    
-
+        public double DryingCoefficient { get; set; }
+        public double MaterialMassKg { get; set; } = 10.0;
         public override string ToString()
         {
             return Name;

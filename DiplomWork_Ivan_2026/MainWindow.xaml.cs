@@ -149,6 +149,11 @@ namespace DiplomWork_Ivan_2026
         {
             UpdateUi();
         }
+        private void DetailsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ProcessDetailsWindow detailsWindow = new ProcessDetailsWindow(_process);
+            detailsWindow.Show();
+        }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -182,7 +187,7 @@ namespace DiplomWork_Ivan_2026
                 _temperatureController.Update(_process.State, _settings, _process.Heater);
                 _pressureController.Update(_process.State, _settings, _process.Pump);
 
-                _process.Fan.TurnOn();
+                _process.Fan.SetSpeed(ManualFanSlider.Value);
             }
             else
             {
@@ -209,13 +214,26 @@ namespace DiplomWork_Ivan_2026
         {
             var state = _process.State;
 
-            StatusTextBlock.Text = state.IsCompleted
-                ? "Status: Process completed"
-                : _isRunning ? "Status: Running" : "Status: Stopped";
+            if (state.IsCompleted)
+            {
+                StatusValueRun.Text = "Process completed";
+                StatusValueRun.Foreground = Brushes.DeepSkyBlue;
+            }
+            else if (_isRunning)
+            {
+                StatusValueRun.Text = "Running";
+                StatusValueRun.Foreground = Brushes.LimeGreen;
+            }
+            else
+            {
+                StatusValueRun.Text = "Stopped";
+                StatusValueRun.Foreground = Brushes.Red;
+            }
 
-            TemperatureTextBlock.Text = $"Temperature: {state.Temperature:F1} °C";
+            TemperatureTextBlock.Text = $"Chamber Temperature: {state.Temperature:F1} °C";
+            MaterialTemperatureTextBlock.Text = $"Material Temperature: {state.MaterialTemperature:F1} °C";
             MoistureTextBlock.Text = $"Material Moisture: {state.MaterialMoisture:F1} %";
-            AirHumidityTextBlock.Text = $"Air Humidity: {state.AirHumidity:F1} %";
+            //AirHumidityTextBlock.Text = $"Air Humidity: {state.AirHumidity:F1} %";
             PressureTextBlock.Text = $"Pressure: {state.Pressure:F1} kPa";
 
             HeaterTextBlock.Text = $"Heater: {state.HeaterPower:F0} %";
@@ -223,35 +241,35 @@ namespace DiplomWork_Ivan_2026
             FanTextBlock.Text = $"Fan: {state.FanSpeed:F0} %";
 
             TimeTextBlock.Text = $"Time: {state.ElapsedTime:F0} s";
-            TrendPointsTextBlock.Text = $"Trend points: {_trendBuffer.Points.Count}";
-
+            //TrendPointsTextBlock.Text = $"Trend points: {_trendBuffer.Points.Count}";
             VacuumLevelTextBlock.Text = $"Vacuum Level: {state.VacuumLevel:F1} %";
+            //AirFlowRateTextBlock.Text = $"Air Flow: {state.AirFlowRate:F1} m³/h";
+            //DryingRateTextBlock.Text =  $"Drying Rate: {state.DryingRate * 60.0:F2} %/min";
+            TotalEnergyTextBlock.Text = $"Total Energy: {state.TotalEnergyKWh:F3} kWh";
+            //EvaporatedWaterTextBlock.Text = $"Evaporated Water: {state.EvaporatedWaterKg:F2} kg";
+            //EfficiencyTextBlock.Text = $"Efficiency: {state.EfficiencyKgPerKWh:F2} kg/kWh";
 
-            AirFlowRateTextBlock.Text = $"Air Flow: {state.AirFlowRate:F1} m³/h";
+            //if (_process.SelectedMaterial != null)
+            //{
+            //    TargetMoistureTextBlock.Text =
+            //        $"Target Moisture: {_process.SelectedMaterial.TargetMoisture:F1} %";
 
-            DryingRateTextBlock.Text =  $"Drying Rate: {state.DryingRate * 60.0:F2} %/min";
+            //    MaxTemperatureTextBlock.Text =
+            //        $"Max Temperature: {_process.SelectedMaterial.MaxTemperature:F1} °C";
+            //}
+            //else if (MaterialComboBox.SelectedItem is DryingMaterial selectedMaterial)
+            //{
+            //    TargetMoistureTextBlock.Text =
+            //        $"Target Moisture: {selectedMaterial.TargetMoisture:F1} %";
 
-            if (_process.SelectedMaterial != null)
-            {
-                TargetMoistureTextBlock.Text =
-                    $"Target Moisture: {_process.SelectedMaterial.TargetMoisture:F1} %";
-
-                MaxTemperatureTextBlock.Text =
-                    $"Max Temperature: {_process.SelectedMaterial.MaxTemperature:F1} °C";
-            }
-            else if (MaterialComboBox.SelectedItem is DryingMaterial selectedMaterial)
-            {
-                TargetMoistureTextBlock.Text =
-                    $"Target Moisture: {selectedMaterial.TargetMoisture:F1} %";
-
-                MaxTemperatureTextBlock.Text =
-                    $"Max Temperature: {selectedMaterial.MaxTemperature:F1} °C";
-            }
-            else
-            {
-                TargetMoistureTextBlock.Text = "Target Moisture: -";
-                MaxTemperatureTextBlock.Text = "Max Temperature: -";
-            }
+            //    MaxTemperatureTextBlock.Text =
+            //        $"Max Temperature: {selectedMaterial.MaxTemperature:F1} °C";
+            //}
+            //else
+            //{
+            //    TargetMoistureTextBlock.Text = "Target Moisture: -";
+            //    MaxTemperatureTextBlock.Text = "Max Temperature: -";
+            //}
             if (_alarmService.ActiveAlarms.Count == 0)
             {
                 AlarmsTextBlock.Text = "No active alarms";
@@ -339,6 +357,57 @@ namespace DiplomWork_Ivan_2026
                 _moistureValues.RemoveAt(0);
             }
         }
+        private void ApplyDryingMode(DryingMode mode)
+        {
+            switch (mode)
+            {
+                case DryingMode.Soft:
+                    TemperatureSetpointTextBox.Text = "45";
+                    PressureSetpointTextBox.Text = "50";
+                    ManualFanSlider.Value = 50;
+                    break;
 
+                case DryingMode.Normal:
+                    TemperatureSetpointTextBox.Text = "60";
+                    PressureSetpointTextBox.Text = "30";
+                    ManualFanSlider.Value = 70;
+                    break;
+
+                case DryingMode.Hard:
+                    TemperatureSetpointTextBox.Text = "75";
+                    PressureSetpointTextBox.Text = "20";
+                    ManualFanSlider.Value = 100;
+                    break;
+            }
+        }
+        private void DryingModeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (DryingModeComboBox == null ||
+                TemperatureSetpointTextBox == null ||
+                PressureSetpointTextBox == null ||
+                ManualFanSlider == null)
+            {
+                return;
+            }
+
+            DryingMode selectedMode = DryingMode.Normal;
+
+            switch (DryingModeComboBox.SelectedIndex)
+            {
+                case 0:
+                    selectedMode = DryingMode.Soft;
+                    break;
+
+                case 1:
+                    selectedMode = DryingMode.Normal;
+                    break;
+
+                case 2:
+                    selectedMode = DryingMode.Hard;
+                    break;
+            }
+
+            ApplyDryingMode(selectedMode);
+        }
     }
 }

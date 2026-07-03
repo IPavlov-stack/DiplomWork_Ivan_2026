@@ -8,7 +8,8 @@ namespace DiplomWork_Ivan_2026.Models
 {
     public class VacuumDryerState
     {
-        public double Temperature { get; set; } = 20.0;          // °C
+        public double Temperature { get; set; } = 20.0;          // Chamber temperature [°C]
+        public double MaterialTemperature { get; set; } = 20.0;  // Material temperature [°C]
         public double MaterialMoisture { get; set; } = 60.0;     // %
         public double AirHumidity { get; set; } = 50.0;          // %
         public double Pressure { get; set; } = 101.3;            // kPa
@@ -18,9 +19,13 @@ namespace DiplomWork_Ivan_2026.Models
         public double VacuumPumpPower { get; set; } = 0.0;       // %
         public double VacuumLevel { get; set; } = 0.0;           // [%]
         public double AirFlowRate { get; set; } = 0.0;           // [m³/h]
-        public double DryingRate { get; set; } = 0.0;            // [%/s]
+        public double DryingRate { get; set; } = 0.0;
+        public double TotalEnergyKWh { get; set; } = 0.0;
+        public double EvaporatedWaterKg { get; set; } = 0.0;
+        public double EfficiencyKgPerKWh { get; set; } = 0.0;    // [%/s]
 
         public double ElapsedTime { get; set; } = 0.0;           // seconds
         public bool IsCompleted { get; set; } = false;
+
     }
 }
