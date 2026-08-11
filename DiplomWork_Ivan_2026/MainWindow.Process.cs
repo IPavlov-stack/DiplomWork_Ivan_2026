@@ -35,7 +35,7 @@ namespace DiplomWork_Ivan_2026
         {
             _isRunning = false;
             _timer.Stop();
-
+            _pidTemperatureController.Reset();
             TurnOffDevices();
 
             _process.State.HeaterPower = 0;
@@ -48,6 +48,7 @@ namespace DiplomWork_Ivan_2026
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
             _timer.Stop();
+            _pidTemperatureController.Reset();
             _isRunning = false;
             _processStarted = false;
 
@@ -98,13 +99,33 @@ namespace DiplomWork_Ivan_2026
 
             if (isAutoMode)
             {
-                _temperatureController.Update(_process.State, _settings, _process.Heater);
+                bool usePidTemperatureControl =
+                    TemperatureControlComboBox != null &&
+                    TemperatureControlComboBox.SelectedIndex == 1;
+
+                if (usePidTemperatureControl)
+                {
+                    double heaterPower = _pidTemperatureController.Update(
+                        _settings.TemperatureSetpoint,
+                        _process.State.Temperature,
+                        1.0);
+
+                    _process.Heater.SetPower(heaterPower);
+                    _process.State.HeaterPower = _process.Heater.Power;
+                }
+                else
+                {
+                    _temperatureController.Update(_process.State, _settings, _process.Heater);
+                }
+
                 _pressureController.Update(_process.State, _settings, _process.Pump);
 
                 _process.Fan.SetSpeed(ManualFanSlider.Value);
             }
             else
             {
+                _pidTemperatureController.Reset();
+
                 _process.Heater.SetPower(ManualHeaterSlider.Value);
                 _process.Pump.SetPower(ManualPumpSlider.Value);
                 _process.Fan.SetSpeed(ManualFanSlider.Value);

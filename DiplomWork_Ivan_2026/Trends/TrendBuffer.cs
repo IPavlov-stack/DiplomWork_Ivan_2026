@@ -8,7 +8,7 @@ namespace DiplomWork_Ivan_2026.Trends
 
         public List<TrendPoint> Points { get; } = new List<TrendPoint>();
 
-        public TrendBuffer(int maxPoints = 300)
+        public TrendBuffer(int maxPoints = 600)
         {
             _maxPoints = maxPoints;
         }
