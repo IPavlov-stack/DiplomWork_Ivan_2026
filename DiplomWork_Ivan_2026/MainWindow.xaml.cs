@@ -18,10 +18,11 @@ namespace DiplomWork_Ivan_2026
         private readonly VacuumDryerProcess _process = new VacuumDryerProcess();
         private readonly Models.ProcessSettings _settings = new Models.ProcessSettings();
         private readonly AlarmService _alarmService = new AlarmService();
-        private readonly TrendBuffer _trendBuffer = new TrendBuffer(300);
+        private readonly TrendBuffer _trendBuffer = new TrendBuffer(600);
 
         private readonly OnOffTemperatureController _temperatureController = new OnOffTemperatureController();
         private readonly OnOffPressureController _pressureController = new OnOffPressureController();
+        private readonly PidTemperatureController _pidTemperatureController = new PidTemperatureController();
         private readonly List<double> _temperatureValues = new List<double>();
         private readonly List<double> _pressureValues = new List<double>();
         private readonly List<double> _moistureValues = new List<double>();
@@ -96,6 +97,13 @@ namespace DiplomWork_Ivan_2026
                     NamePaint = new SolidColorPaint(SKColors.White)
                 }
             };
+        }
+        private void TemperatureControlComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (_pidTemperatureController == null)
+                return;
+
+            _pidTemperatureController.Reset();
         }
     }
 }
