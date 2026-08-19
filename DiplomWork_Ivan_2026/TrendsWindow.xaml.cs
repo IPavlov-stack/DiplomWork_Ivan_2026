@@ -45,6 +45,16 @@ namespace DiplomWork_Ivan_2026
             DrawSelectedTrend();
         }
 
+        private void TimeRangeComboBox_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
+        {
+            if (MainTrendCanvas == null)
+                return;
+
+            DrawSelectedTrend();
+        }
+
         private void DrawSelectedTrend()
         {
             if (_trendBuffer.Points.Count == 0)
@@ -60,7 +70,8 @@ namespace DiplomWork_Ivan_2026
 
             TrendChartData chartData = TrendChartDataBuilder.Build(
                 _trendBuffer.Points,
-                TrendComboBox.SelectedIndex);
+                TrendComboBox.SelectedIndex,
+                GetSelectedTimeRangeSeconds());
 
             ChartTitleTextBlock.Text = chartData.Title;
             CurrentValueTextBlock.Text = chartData.CurrentText;
@@ -69,6 +80,21 @@ namespace DiplomWork_Ivan_2026
             _currentXValues = chartData.XValues;
             _currentSeries = chartData.Series;
             _renderState = _chartRenderer.Draw(MainTrendCanvas, chartData.XValues, chartData.Series);
+        }
+
+        private double? GetSelectedTimeRangeSeconds()
+        {
+            if (TimeRangeComboBox?.SelectedItem is not ComboBoxItem selectedItem)
+                return 600.0;
+
+            string? tag = selectedItem.Tag?.ToString();
+
+            if (string.Equals(tag, "All", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            return double.TryParse(tag, out double seconds) && seconds > 0.0
+                ? seconds
+                : 600.0;
         }
 
         private void MainTrendCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -185,7 +211,7 @@ namespace DiplomWork_Ivan_2026
 
             TextBlock timeText = new TextBlock
             {
-                Text = $"Time: {timeValue:F0} s",
+                Text = $"Elapsed: {TrendTimeFormatter.FormatCursor(timeValue)}",
                 Foreground = Brushes.White,
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,

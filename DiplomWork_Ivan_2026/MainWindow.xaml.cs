@@ -19,17 +19,24 @@ namespace DiplomWork_Ivan_2026
         private readonly VacuumDryerProcess _process = new VacuumDryerProcess();
         private readonly Models.ProcessSettings _settings = new Models.ProcessSettings();
         private readonly AlarmService _alarmService = new AlarmService();
-        private readonly TrendBuffer _trendBuffer = new TrendBuffer(600);
+        private readonly SafetyInterlockService _safetyInterlockService = new SafetyInterlockService();
+        private readonly TrendBuffer _trendBuffer = new TrendBuffer(50_000);
 
         private readonly OnOffTemperatureController _temperatureController = new OnOffTemperatureController();
-        private readonly OnOffPressureController _pressureController = new OnOffPressureController();
+        private readonly PiPressureController _pressureController = new PiPressureController();
         private readonly PidTemperatureController _pidTemperatureController = new PidTemperatureController();
+        private readonly AutomaticProcessController _automaticProcessController = new AutomaticProcessController();
         private readonly List<double> _temperatureValues = new List<double>();
         private readonly List<double> _pressureValues = new List<double>();
         private readonly List<double> _moistureValues = new List<double>();
 
         private bool _isRunning = false;
         private bool _processStarted = false;
+        private int _simulationSpeedMultiplier = 1;
+        private double _automaticFanSpeedSetpoint = 70.0;
+
+        private const double SimulationIntegrationStepSeconds = 0.1;
+        private const int IntegrationSubstepsPerTrendSample = 10;
 
         public ISeries[] ProcessSeries { get; set; } = System.Array.Empty<ISeries>();
         public Axis[] XAxes { get; set; } = System.Array.Empty<Axis>();

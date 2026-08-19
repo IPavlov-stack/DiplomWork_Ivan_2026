@@ -17,43 +17,72 @@ namespace DiplomWork_Ivan_2026.Services
                 new DryingMaterial
                 {
                     Name = "Herbs",
-                    InitialMoisture = 70,
-                    TargetMoisture = 10,
+                    InitialMoistureWetBasisPercent = 70,
+                    TargetMoistureWetBasisPercent = 10,
+                    EquilibriumMoistureWetBasisPercent = 5,
                     MaxTemperature = 45,
                     DryingCoefficient = 0.8,
-                    MaterialMassKg = 5
+                    InitialWetMassKg = 5,
+                    SoftRecipe = Recipe(35, 55, 50),
+                    NormalRecipe = Recipe(40, 45, 70),
+                    HardRecipe = Recipe(43, 35, 90)
                 },
 
                 new DryingMaterial
                 {
                     Name = "Grain",
-                    InitialMoisture = 25,
-                    TargetMoisture = 13,
+                    InitialMoistureWetBasisPercent = 25,
+                    TargetMoistureWetBasisPercent = 13,
+                    EquilibriumMoistureWetBasisPercent = 8,
                     MaxTemperature = 60,
                     DryingCoefficient = 0.5,
-                    MaterialMassKg = 20
+                    InitialWetMassKg = 20,
+                    SoftRecipe = Recipe(45, 50, 50),
+                    NormalRecipe = Recipe(52, 35, 70),
+                    HardRecipe = Recipe(58, 25, 90)
                 },
 
                 new DryingMaterial
                 {
                     Name = "Wood",
-                    InitialMoisture = 50,
-                    TargetMoisture = 12,
+                    InitialMoistureWetBasisPercent = 50,
+                    TargetMoistureWetBasisPercent = 12,
+                    EquilibriumMoistureWetBasisPercent = 6,
                     MaxTemperature = 80,
                     DryingCoefficient = 0.3,
-                    MaterialMassKg = 15
+                    InitialWetMassKg = 15,
+                    SoftRecipe = Recipe(45, 50, 50),
+                    NormalRecipe = Recipe(60, 30, 70),
+                    HardRecipe = Recipe(75, 20, 100)
                 },
 
                 new DryingMaterial
                 {
                     Name = "Fruits",
-                    InitialMoisture = 80,
-                    TargetMoisture = 15,
+                    InitialMoistureWetBasisPercent = 80,
+                    TargetMoistureWetBasisPercent = 15,
+                    EquilibriumMoistureWetBasisPercent = 8,
                     MaxTemperature = 55,
                     DryingCoefficient = 0.6,
-                    MaterialMassKg = 8
+                    InitialWetMassKg = 8,
+                    SoftRecipe = Recipe(38, 55, 50),
+                    NormalRecipe = Recipe(47, 40, 70),
+                    HardRecipe = Recipe(53, 30, 90)
                 }
                };
+            }
+
+            private static DryingRecipe Recipe(
+                double temperatureSetpointC,
+                double pressureSetpointKPa,
+                double fanSpeedPercent)
+            {
+                return new DryingRecipe
+                {
+                    TemperatureSetpointC = temperatureSetpointC,
+                    PressureSetpointKPa = pressureSetpointKPa,
+                    FanSpeedPercent = fanSpeedPercent
+                };
             }
     }
     

@@ -6,6 +6,10 @@
         SetpointAboveMaterialLimit,
         PressureTooHigh,
         PressureTooLow,
+        VacuumTimeout,
+        SafetyInterlock,
+        EmergencyStop,
+        SensorFault,
         ProcessCompleted
     }
 }

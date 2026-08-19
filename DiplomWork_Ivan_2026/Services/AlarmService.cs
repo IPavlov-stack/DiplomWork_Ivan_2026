@@ -21,16 +21,37 @@ namespace DiplomWork_Ivan_2026.Services
             if (material == null)
                 return;
 
-            if (state.Temperature > material.MaxTemperature)
+            if (state.MeasuredMaterialTemperature > material.MaxTemperature)
             {
                 AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.HighTemperature,
                     Severity = AlarmSeverity.Critical,
-                    Message = $"High temperature! Current: {state.Temperature:F1} °C, Limit: {material.MaxTemperature:F1} °C"
+                    Message = $"High material temperature! Current: {state.MeasuredMaterialTemperature:F1} °C, Limit: {material.MaxTemperature:F1} °C"
                 });
 
-                process.Heater.TurnOff();
+            }
+
+            if (state.SafetyInterlockActive)
+            {
+                AddAlarm(new AlarmInfo
+                {
+                    Type = state.EmergencyStopActive
+                        ? AlarmType.EmergencyStop
+                        : AlarmType.SafetyInterlock,
+                    Severity = AlarmSeverity.Critical,
+                    Message = state.SafetyInterlockReason
+                });
+            }
+
+            if (process.HasSensorFault)
+            {
+                AddAlarm(new AlarmInfo
+                {
+                    Type = AlarmType.SensorFault,
+                    Severity = AlarmSeverity.Critical,
+                    Message = "A critical virtual sensor is in a fault state."
+                });
             }
 
             if (settings.TemperatureSetpoint > material.MaxTemperature)
@@ -43,23 +64,23 @@ namespace DiplomWork_Ivan_2026.Services
                 });
             }
 
-            if (state.Pressure > settings.PressureSetpoint + 30)
+            if (state.MeasuredPressure > settings.PressureSetpoint + 30)
             {
                 AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.PressureTooHigh,
                     Severity = AlarmSeverity.Warning,
-                    Message = $"Pressure is too high. Current: {state.Pressure:F1} kPa"
+                    Message = $"Pressure is too high. Current: {state.MeasuredPressure:F1} kPa"
                 });
             }
 
-            if (state.Pressure < 5)
+            if (state.MeasuredPressure < 5)
             {
                 AddAlarm(new AlarmInfo
                 {
                     Type = AlarmType.PressureTooLow,
                     Severity = AlarmSeverity.Critical,
-                    Message = $"Pressure is too low. Current: {state.Pressure:F1} kPa"
+                    Message = $"Pressure is too low. Current: {state.MeasuredPressure:F1} kPa"
                 });
             }
 

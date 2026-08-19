@@ -243,6 +243,7 @@ namespace DiplomWork_Ivan_2026.Trends
         private static void DrawXTicks(Canvas canvas, TrendChartRenderState renderState)
         {
             int xTickCount = 6;
+            double visibleSpanSeconds = renderState.MaxX - renderState.MinX;
 
             for (int i = 0; i < xTickCount; i++)
             {
@@ -274,12 +275,19 @@ namespace DiplomWork_Ivan_2026.Trends
 
                 TextBlock label = new TextBlock
                 {
-                    Text = value.ToString("F0"),
+                    Text = TrendTimeFormatter.FormatAxisTick(
+                        value,
+                        visibleSpanSeconds,
+                        renderState.MaxX),
                     Foreground = Brushes.White,
-                    FontSize = 12
+                    FontSize = 12,
+                    Width = 110,
+                    TextAlignment = TextAlignment.Center
                 };
 
-                Canvas.SetLeft(label, x - 10);
+                Canvas.SetLeft(
+                    label,
+                    Math.Clamp(x - 55, 0.0, Math.Max(0.0, canvas.ActualWidth - 110)));
                 Canvas.SetTop(label, renderState.MarginTop + renderState.PlotHeight + 5);
                 canvas.Children.Add(label);
             }
@@ -289,12 +297,18 @@ namespace DiplomWork_Ivan_2026.Trends
         {
             TextBlock timeText = new TextBlock
             {
-                Text = "Time [s]",
+                Text = TrendTimeFormatter.GetAxisTitle(
+                    renderState.MaxX - renderState.MinX,
+                    renderState.MaxX),
                 Foreground = Brushes.White,
-                FontSize = 14
+                FontSize = 14,
+                Width = 220,
+                TextAlignment = TextAlignment.Center
             };
 
-            Canvas.SetLeft(timeText, renderState.MarginLeft + renderState.PlotWidth / 2 - 30);
+            Canvas.SetLeft(
+                timeText,
+                renderState.MarginLeft + renderState.PlotWidth / 2 - 110);
             Canvas.SetTop(timeText, renderState.MarginTop + renderState.PlotHeight + 25);
             canvas.Children.Add(timeText);
         }

@@ -70,7 +70,10 @@
                     <TextBlock x:Name="PressureTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="VacuumLevelTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="AirHumidityTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="VaporPressureTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="MaterialMoistureTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="EquilibriumMoistureTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="MoistureRatioTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="DryingRateTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="AirFlowRateTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                 </StackPanel>
@@ -109,8 +112,12 @@
                 <StackPanel Margin="15">
                     <TextBlock x:Name="TotalEnergyTextBlock" Foreground="White" FontSize="16"/>
                     <TextBlock x:Name="EvaporatedWaterTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="PumpedVaporTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="CondensedWaterTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="VaporBalanceTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="EfficiencyTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="ElapsedTimeTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="RemainingTimeTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                 </StackPanel>
             </GroupBox>
 
@@ -127,7 +134,10 @@
                 <StackPanel Margin="15">
                     <TextBlock x:Name="HeaterPowerTextBlock" Foreground="White" FontSize="16"/>
                     <TextBlock x:Name="PumpPowerTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="VentValveTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="FanSpeedTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="ProcessStageTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="SensorStatusTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                     <TextBlock x:Name="ProcessStatusTextBlock" Foreground="White" FontSize="16" Margin="0,6,0,0"/>
                 </StackPanel>
             </GroupBox>

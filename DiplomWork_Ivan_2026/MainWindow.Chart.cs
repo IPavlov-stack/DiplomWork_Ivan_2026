@@ -6,9 +6,9 @@ namespace DiplomWork_Ivan_2026
         {
             var state = _process.State;
 
-            _temperatureValues.Add(state.Temperature);
-            _pressureValues.Add(state.Pressure);
-            _moistureValues.Add(state.MaterialMoisture);
+            _temperatureValues.Add(state.MeasuredTemperature);
+            _pressureValues.Add(state.MeasuredPressure);
+            _moistureValues.Add(state.MaterialMoistureWetBasisPercent);
 
             if (_temperatureValues.Count > 100)
             {

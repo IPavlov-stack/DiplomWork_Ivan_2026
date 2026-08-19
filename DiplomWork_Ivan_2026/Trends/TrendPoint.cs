@@ -15,11 +15,12 @@
         public double VacuumLevel { get; set; }
 
         // Moisture / humidity group
-        public double MaterialMoisture { get; set; }
+        public double MaterialMoisture { get; set; }          // wet-basis [%]
+        public double EquilibriumMoisture { get; set; }       // wet-basis [%]
         public double AirHumidity { get; set; }
 
         // Drying group
-        public double DryingRate { get; set; }               // [%/min]
+        public double DryingRate { get; set; }               // wet-basis [%/min]
 
         // Energy group
         public double TotalEnergyKWh { get; set; }
@@ -29,6 +30,7 @@
         // Actuator group
         public double HeaterPower { get; set; }
         public double PumpPower { get; set; }
+        public double VentValveOpening { get; set; }
         public double FanSpeed { get; set; }
     }
 }

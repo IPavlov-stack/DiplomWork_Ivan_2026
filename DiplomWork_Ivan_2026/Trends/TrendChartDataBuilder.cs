@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
@@ -6,9 +7,25 @@ namespace DiplomWork_Ivan_2026.Trends
 {
     public static class TrendChartDataBuilder
     {
-        public static TrendChartData Build(IReadOnlyList<TrendPoint> points, int selectedTrendIndex)
+        public const int MaxRenderedPoints = 1_200;
+
+        public static TrendChartData Build(
+            IReadOnlyList<TrendPoint> allPoints,
+            int selectedTrendIndex,
+            double? timeRangeSeconds)
         {
-            TrendPoint last = points[points.Count - 1];
+            if (allPoints.Count == 0)
+                return new TrendChartData();
+
+            List<TrendPoint> rangePoints = TrendPointDownsampler.SelectTimeRange(
+                allPoints,
+                timeRangeSeconds);
+            List<TrendPoint> points = TrendPointDownsampler.DownsampleMinMax(
+                rangePoints,
+                GetValueSelectors(selectedTrendIndex),
+                MaxRenderedPoints);
+
+            TrendPoint last = allPoints[allPoints.Count - 1];
 
             TrendChartData data = new TrendChartData
             {
@@ -63,7 +80,7 @@ namespace DiplomWork_Ivan_2026.Trends
                     break;
 
                 case 2:
-                    data.Title = "Moisture / Humidity [%]";
+                    data.Title = "Moisture (wet basis) / Humidity [%]";
                     data.Series.Add(new ChartSeries
                     {
                         Name = "Material Moisture",
@@ -72,24 +89,31 @@ namespace DiplomWork_Ivan_2026.Trends
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Air Humidity",
+                        Name = "Dynamic Equilibrium Moisture",
+                        Values = points.Select(p => p.EquilibriumMoisture).ToList(),
+                        Brush = Brushes.Gold
+                    });
+                    data.Series.Add(new ChartSeries
+                    {
+                        Name = "Chamber Relative Humidity",
                         Values = points.Select(p => p.AirHumidity).ToList(),
                         Brush = Brushes.DeepSkyBlue
                     });
                     data.CurrentText =
-                        $"Material Moisture: {last.MaterialMoisture:F1} %   " +
-                        $"Air Humidity: {last.AirHumidity:F1} %";
+                        $"Material Moisture: {last.MaterialMoisture:F1} % wb   " +
+                        $"Equilibrium: {last.EquilibriumMoisture:F1} % wb   " +
+                        $"RH: {last.AirHumidity:F1} %";
                     break;
 
                 case 3:
-                    data.Title = "Drying Rate [%/min]";
+                    data.Title = "Drying Rate [% wb/min]";
                     data.Series.Add(new ChartSeries
                     {
                         Name = "Drying Rate",
                         Values = points.Select(p => p.DryingRate).ToList(),
                         Brush = Brushes.Gold
                     });
-                    data.CurrentText = $"Drying Rate: {last.DryingRate:F2} %/min";
+                    data.CurrentText = $"Drying Rate: {last.DryingRate:F3} % wb/min";
                     break;
 
                 case 4:
@@ -108,6 +132,12 @@ namespace DiplomWork_Ivan_2026.Trends
                     });
                     data.Series.Add(new ChartSeries
                     {
+                        Name = "Vent Valve",
+                        Values = points.Select(p => p.VentValveOpening).ToList(),
+                        Brush = Brushes.Gold
+                    });
+                    data.Series.Add(new ChartSeries
+                    {
                         Name = "Fan Speed",
                         Values = points.Select(p => p.FanSpeed).ToList(),
                         Brush = Brushes.LimeGreen
@@ -115,6 +145,7 @@ namespace DiplomWork_Ivan_2026.Trends
                     data.CurrentText =
                         $"Heater: {last.HeaterPower:F0} %   " +
                         $"Pump: {last.PumpPower:F0} %   " +
+                        $"Vent: {last.VentValveOpening:F0} %   " +
                         $"Fan: {last.FanSpeed:F0} %";
                     break;
 
@@ -142,6 +173,50 @@ namespace DiplomWork_Ivan_2026.Trends
             }
 
             return data;
+        }
+
+        private static IReadOnlyList<Func<TrendPoint, double>> GetValueSelectors(
+            int selectedTrendIndex)
+        {
+            return selectedTrendIndex switch
+            {
+                0 => new Func<TrendPoint, double>[]
+                {
+                    point => point.Temperature,
+                    point => point.MaterialTemperature,
+                    point => point.TemperatureSetpoint
+                },
+                1 => new Func<TrendPoint, double>[]
+                {
+                    point => point.Pressure,
+                    point => point.PressureSetpoint
+                },
+                2 => new Func<TrendPoint, double>[]
+                {
+                    point => point.MaterialMoisture,
+                    point => point.EquilibriumMoisture,
+                    point => point.AirHumidity
+                },
+                3 => new Func<TrendPoint, double>[]
+                {
+                    point => point.DryingRate
+                },
+                4 => new Func<TrendPoint, double>[]
+                {
+                    point => point.HeaterPower,
+                    point => point.PumpPower,
+                    point => point.VentValveOpening,
+                    point => point.FanSpeed
+                },
+                5 => new Func<TrendPoint, double>[]
+                {
+                    point => point.TotalEnergyKWh
+                },
+                _ => new Func<TrendPoint, double>[]
+                {
+                    point => point.Temperature
+                }
+            };
         }
     }
 }

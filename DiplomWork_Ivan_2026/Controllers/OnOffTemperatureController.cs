@@ -13,11 +13,11 @@ namespace DiplomWork_Ivan_2026.Controllers
     {
         public void Update(VacuumDryerState state, ProcessSettings settings, Heater heater)
         {
-            if (state.Temperature < settings.TemperatureSetpoint - settings.TemperatureHysteresis)
+            if (state.MeasuredTemperature < settings.TemperatureSetpoint - settings.TemperatureHysteresis)
             {
                 heater.TurnOn();
             }
-            else if (state.Temperature > settings.TemperatureSetpoint + settings.TemperatureHysteresis)
+            else if (state.MeasuredTemperature > settings.TemperatureSetpoint + settings.TemperatureHysteresis)
             {
                 heater.TurnOff();
             }

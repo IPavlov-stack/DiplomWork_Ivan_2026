@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Windows;
 using DiplomWork_Ivan_2026.Enums;
+using DiplomWork_Ivan_2026.Models;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -7,26 +9,56 @@ namespace DiplomWork_Ivan_2026
     {
         private void ApplyDryingMode(DryingMode mode)
         {
-            switch (mode)
+            if (MaterialComboBox?.SelectedItem is not DryingMaterial material)
+                return;
+
+            DryingRecipe recipe = material.GetRecipe(mode);
+            double maximumRecommendedTemperature = Math.Max(
+                _settings.AmbientTemperature + 1.0,
+                material.MaxTemperature - 1.0);
+            double safeTemperatureSetpoint = Math.Clamp(
+                recipe.TemperatureSetpointC,
+                _settings.AmbientTemperature + 1.0,
+                maximumRecommendedTemperature);
+            double safePressureSetpoint = Math.Clamp(
+                recipe.PressureSetpointKPa,
+                _process.Parameters.MinimumPressureKPa + 0.1,
+                _settings.AmbientPressure);
+            double safeFanSpeed = Math.Clamp(
+                recipe.FanSpeedPercent,
+                0.0,
+                100.0);
+
+            TemperatureSetpointTextBox.Text =
+                safeTemperatureSetpoint.ToString(
+                    "0.#",
+                    CultureInfo.CurrentCulture);
+            PressureSetpointTextBox.Text =
+                safePressureSetpoint.ToString(
+                    "0.#",
+                    CultureInfo.CurrentCulture);
+            ManualFanSlider.Value = safeFanSpeed;
+            _automaticFanSpeedSetpoint = safeFanSpeed;
+
+            if (DryingRecipeInfoTextBlock != null)
             {
-                case DryingMode.Soft:
-                    TemperatureSetpointTextBox.Text = "45";
-                    PressureSetpointTextBox.Text = "50";
-                    ManualFanSlider.Value = 50;
-                    break;
-
-                case DryingMode.Normal:
-                    TemperatureSetpointTextBox.Text = "60";
-                    PressureSetpointTextBox.Text = "30";
-                    ManualFanSlider.Value = 70;
-                    break;
-
-                case DryingMode.Hard:
-                    TemperatureSetpointTextBox.Text = "75";
-                    PressureSetpointTextBox.Text = "20";
-                    ManualFanSlider.Value = 100;
-                    break;
+                DryingRecipeInfoTextBlock.Text =
+                    $"Suggested simulation recipe for {material.Name}: " +
+                    $"{safeTemperatureSetpoint:F0} °C, " +
+                    $"{safePressureSetpoint:F0} kPa, " +
+                    $"fan {safeFanSpeed:F0}%. " +
+                    $"Material limit: {material.MaxTemperature:F0} °C.";
             }
+        }
+
+        private DryingMode GetSelectedDryingMode()
+        {
+            return DryingModeComboBox?.SelectedIndex switch
+            {
+                0 => DryingMode.Soft,
+                2 => DryingMode.Hard,
+                _ => DryingMode.Normal
+            };
         }
 
         private void DryingModeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -39,24 +71,7 @@ namespace DiplomWork_Ivan_2026
                 return;
             }
 
-            DryingMode selectedMode = DryingMode.Normal;
-
-            switch (DryingModeComboBox.SelectedIndex)
-            {
-                case 0:
-                    selectedMode = DryingMode.Soft;
-                    break;
-
-                case 1:
-                    selectedMode = DryingMode.Normal;
-                    break;
-
-                case 2:
-                    selectedMode = DryingMode.Hard;
-                    break;
-            }
-
-            ApplyDryingMode(selectedMode);
+            ApplyDryingMode(GetSelectedDryingMode());
         }
 
         private bool UpdateSettingsFromUi()
@@ -70,6 +85,33 @@ namespace DiplomWork_Ivan_2026
             if (!double.TryParse(PressureSetpointTextBox.Text, out double pressureSetpoint))
             {
                 MessageBox.Show("Invalid pressure setpoint.");
+                return false;
+            }
+
+            if (pressureSetpoint <= 5.0 ||
+                pressureSetpoint > _settings.AmbientPressure)
+            {
+                MessageBox.Show(
+                    $"Pressure setpoint must be above 5.0 kPa and not greater than {_settings.AmbientPressure:F1} kPa.");
+                return false;
+            }
+
+            if (temperatureSetpoint <= _settings.AmbientTemperature ||
+                temperatureSetpoint > 200.0)
+            {
+                MessageBox.Show(
+                    $"Temperature setpoint must be above {_settings.AmbientTemperature:F1} °C and not greater than 200 °C.");
+                return false;
+            }
+
+            if (MaterialComboBox.SelectedItem is DryingMaterial material &&
+                temperatureSetpoint > material.MaxTemperature)
+            {
+                MessageBox.Show(
+                    $"Temperature setpoint {temperatureSetpoint:F1} °C exceeds " +
+                    $"the safe limit for {material.Name}: " +
+                    $"{material.MaxTemperature:F1} °C. " +
+                    "Select a recommended drying mode or reduce the setpoint.");
                 return false;
             }
 

@@ -4,37 +4,40 @@ namespace DiplomWork_Ivan_2026.Trends
 {
     public class TrendBuffer
     {
-        private readonly int _maxPoints;
+        private readonly TrendPointRingBuffer _points;
 
-        public List<TrendPoint> Points { get; } = new List<TrendPoint>();
+        public IReadOnlyList<TrendPoint> Points => _points;
 
-        public TrendBuffer(int maxPoints = 600)
+        public TrendBuffer(int maxPoints = 50_000)
         {
-            _maxPoints = maxPoints;
+            _points = new TrendPointRingBuffer(maxPoints);
         }
 
         public void AddPoint(VacuumDryerState state, ProcessSettings settings)
         {
-            Points.Add(new TrendPoint
+            _points.Add(new TrendPoint
             {
                 Time = state.ElapsedTime,
 
                 // Temperature group
-                Temperature = state.Temperature,
-                MaterialTemperature = state.MaterialTemperature,
-                TemperatureSetpoint = settings.TemperatureSetpoint,
+                Temperature = state.MeasuredTemperature,
+                MaterialTemperature = state.MeasuredMaterialTemperature,
+                TemperatureSetpoint = state.ActiveTemperatureSetpoint,
 
                 // Pressure group
-                Pressure = state.Pressure,
-                PressureSetpoint = settings.PressureSetpoint,
+                Pressure = state.MeasuredPressure,
+                PressureSetpoint = state.ActivePressureSetpoint,
                 VacuumLevel = state.VacuumLevel,
 
                 // Moisture / humidity group
-                MaterialMoisture = state.MaterialMoisture,
+                MaterialMoisture = state.MaterialMoistureWetBasisPercent,
+                EquilibriumMoisture =
+                    DryingMaterial.DryBasisToWetBasisPercent(
+                        state.DynamicEquilibriumMoistureDryBasis),
                 AirHumidity = state.AirHumidity,
 
                 // Drying group
-                DryingRate = state.DryingRate * 60.0,
+                DryingRate = state.DryingRateWetBasisPercentPerMinute,
 
                 // Energy group
                 TotalEnergyKWh = state.TotalEnergyKWh,
@@ -44,18 +47,15 @@ namespace DiplomWork_Ivan_2026.Trends
                 // Actuator group
                 HeaterPower = state.HeaterPower,
                 PumpPower = state.VacuumPumpPower,
+                VentValveOpening = state.VentValveOpening,
                 FanSpeed = state.FanSpeed
             });
 
-            if (Points.Count > _maxPoints)
-            {
-                Points.RemoveAt(0);
-            }
         }
 
         public void Clear()
         {
-            Points.Clear();
+            _points.Clear();
         }
     }
 }

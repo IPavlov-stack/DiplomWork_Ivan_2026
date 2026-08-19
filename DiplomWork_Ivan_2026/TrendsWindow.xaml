@@ -55,7 +55,10 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="240"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="130"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="520"/>
                 </Grid.ColumnDefinitions>
@@ -79,8 +82,26 @@
                     <ComboBoxItem Content="Energy"/>
                 </ComboBox>
 
+                <TextBlock Grid.Column="3"
+                           Text="Time range:"
+                           Foreground="White"
+                           FontSize="16"
+                           VerticalAlignment="Center"/>
+
+                <ComboBox x:Name="TimeRangeComboBox"
+                          Grid.Column="4"
+                          Height="32"
+                          FontSize="15"
+                          SelectedIndex="0"
+                          SelectionChanged="TimeRangeComboBox_SelectionChanged">
+                    <ComboBoxItem Content="10 min" Tag="600"/>
+                    <ComboBoxItem Content="1 h" Tag="3600"/>
+                    <ComboBoxItem Content="4 h" Tag="14400"/>
+                    <ComboBoxItem Content="All" Tag="All"/>
+                </ComboBox>
+
                 <TextBlock x:Name="CurrentValueTextBlock"
-                           Grid.Column="3"
+                           Grid.Column="6"
                            Text="Current: 0.0"
                            Foreground="White"
                            FontSize="16"

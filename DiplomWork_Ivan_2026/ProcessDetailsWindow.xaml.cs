@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Threading;
+using DiplomWork_Ivan_2026.Models;
 using DiplomWork_Ivan_2026.Simulation;
 
 namespace DiplomWork_Ivan_2026
@@ -34,25 +35,36 @@ namespace DiplomWork_Ivan_2026
             var material = _process.SelectedMaterial;
 
             ChamberTemperatureTextBlock.Text =
-                $"Chamber Temperature: {state.Temperature:F1} °C";
+                $"Chamber Temperature: {state.MeasuredTemperature:F1} °C";
 
             MaterialTemperatureTextBlock.Text =
-                $"Material Temperature: {state.MaterialTemperature:F1} °C";
+                $"Material Temperature: {state.MeasuredMaterialTemperature:F1} °C";
 
             PressureTextBlock.Text =
-                $"Pressure: {state.Pressure:F1} kPa";
+                $"Pressure: {state.MeasuredPressure:F1} kPa";
 
             VacuumLevelTextBlock.Text =
                 $"Vacuum Level: {state.VacuumLevel:F1} %";
 
             AirHumidityTextBlock.Text =
-                $"Air Humidity: {state.AirHumidity:F1} %";
+                $"Relative Humidity: {state.AirHumidity:F1} %";
+
+            VaporPressureTextBlock.Text =
+                $"Water Vapor Partial Pressure: {state.WaterVaporPartialPressureKPa:F2} kPa";
 
             MaterialMoistureTextBlock.Text =
-                $"Material Moisture: {state.MaterialMoisture:F1} %";
+                $"Material Moisture: {state.MaterialMoistureWetBasisPercent:F1} % wb " +
+                $"(X = {state.MaterialMoistureDryBasis:F3} kg/kg db)";
+
+            EquilibriumMoistureTextBlock.Text =
+                $"Dynamic Equilibrium Moisture: " +
+                $"{DryingMaterial.DryBasisToWetBasisPercent(state.DynamicEquilibriumMoistureDryBasis):F1} % wb";
+
+            MoistureRatioTextBlock.Text =
+                $"Moisture Ratio: {state.MoistureRatio:F3}";
 
             DryingRateTextBlock.Text =
-                $"Drying Rate: {state.DryingRate * 60.0:F2} %/min";
+                $"Drying Rate: {state.DryingRateWetBasisPercentPerMinute:F3} % wb/min";
 
             AirFlowRateTextBlock.Text =
                 $"Air Flow Rate: {state.AirFlowRate:F1} m³/h";
@@ -63,11 +75,24 @@ namespace DiplomWork_Ivan_2026
             EvaporatedWaterTextBlock.Text =
                 $"Evaporated Water: {state.EvaporatedWaterKg:F2} kg";
 
+            PumpedVaporTextBlock.Text =
+                $"Pumped Water Vapor: {state.PumpedWaterVaporKg:F2} kg";
+
+            CondensedWaterTextBlock.Text =
+                $"Condensed Water: {state.CondensedWaterKg:F2} kg";
+
+            VaporBalanceTextBlock.Text =
+                $"Water Vapor Balance Residual: " +
+                $"{state.WaterVaporMassBalanceResidualKg:F4} kg";
+
             EfficiencyTextBlock.Text =
                 $"Efficiency: {state.EfficiencyKgPerKWh:F2} kg/kWh";
 
             ElapsedTimeTextBlock.Text =
                 $"Elapsed Time: {state.ElapsedTime:F0} s";
+
+            RemainingTimeTextBlock.Text =
+                $"Estimated Remaining Time: {FormatRemainingTime(state.EstimatedRemainingTimeSeconds)}";
 
             HeaterPowerTextBlock.Text =
                 $"Heater Power: {state.HeaterPower:F0} %";
@@ -75,8 +100,17 @@ namespace DiplomWork_Ivan_2026
             PumpPowerTextBlock.Text =
                 $"Vacuum Pump Power: {state.VacuumPumpPower:F0} %";
 
+            VentValveTextBlock.Text =
+                $"Vent Valve Opening: {state.VentValveOpening:F0} %";
+
             FanSpeedTextBlock.Text =
                 $"Fan Speed: {state.FanSpeed:F0} %";
+
+            ProcessStageTextBlock.Text =
+                $"Process Stage: {state.ProcessStage}";
+
+            SensorStatusTextBlock.Text =
+                _process.HasSensorFault ? "Sensors: FAULT" : "Sensors: OK";
 
             ProcessStatusTextBlock.Text =
                 state.IsCompleted ? "Process Status: Completed" : "Process Status: Active / Stopped";
@@ -87,10 +121,10 @@ namespace DiplomWork_Ivan_2026
                     $"Material: {material.Name}";
 
                 InitialMoistureTextBlock.Text =
-                    $"Initial Moisture: {material.InitialMoisture:F1} %";
+                    $"Initial Moisture: {material.InitialMoistureWetBasisPercent:F1} % wb";
 
                 TargetMoistureTextBlock.Text =
-                    $"Target Moisture: {material.TargetMoisture:F1} %";
+                    $"Target Moisture: {material.TargetMoistureWetBasisPercent:F1} % wb";
 
                 MaxTemperatureTextBlock.Text =
                     $"Max Temperature: {material.MaxTemperature:F1} °C";
@@ -99,7 +133,8 @@ namespace DiplomWork_Ivan_2026
                     $"Drying Coefficient: {material.DryingCoefficient:F2}";
 
                 MaterialMassTextBlock.Text =
-                    $"Material Mass: {material.MaterialMassKg:F1} kg";
+                    $"Initial Wet Mass: {material.InitialWetMassKg:F1} kg " +
+                    $"(Dry Mass: {material.DryMassKg:F2} kg)";
             }
             else
             {
@@ -115,6 +150,18 @@ namespace DiplomWork_Ivan_2026
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private static string FormatRemainingTime(double? seconds)
+        {
+            if (!seconds.HasValue)
+                return "calculating...";
+
+            TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(0.0, seconds.Value));
+            if (remaining.TotalDays >= 1.0)
+                return $"{(int)remaining.TotalDays}d {remaining.Hours:D2}h";
+
+            return $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

@@ -8,12 +8,18 @@ namespace DiplomWork_Ivan_2026.Controllers
         public double Ki { get; set; } = 1.2;
         public double Kd { get; set; } = 0.7;
 
+        // First-order low-pass filter for the derivative term. The derivative
+        // is calculated from the measured temperature to avoid derivative kick
+        // when the setpoint is changed.
+        public double DerivativeFilterTimeConstantSeconds { get; set; } = 5.0;
+
         public double MinOutput { get; set; } = 0.0;
         public double MaxOutput { get; set; } = 100.0;
 
         private double _integral;
-        private double _previousError;
-        private bool _hasPreviousError;
+        private double _previousMeasurement;
+        private double _filteredDerivative;
+        private bool _hasPreviousMeasurement;
 
         public double Update(double setpoint, double currentValue, double deltaTime)
         {
@@ -22,16 +28,26 @@ namespace DiplomWork_Ivan_2026.Controllers
 
             double error = setpoint - currentValue;
 
-            double derivative = 0.0;
-
-            if (_hasPreviousError)
+            if (_hasPreviousMeasurement)
             {
-                derivative = (error - _previousError) / deltaTime;
+                double measurementDerivative =
+                    (currentValue - _previousMeasurement) / deltaTime;
+                double filterTimeConstant = Math.Max(
+                    0.0,
+                    DerivativeFilterTimeConstantSeconds);
+                double filterCoefficient =
+                    deltaTime / (filterTimeConstant + deltaTime);
+
+                _filteredDerivative += filterCoefficient *
+                    (measurementDerivative - _filteredDerivative);
             }
+
+            // D on measurement: a rising temperature must reduce heater output.
+            double derivativeTerm = -Kd * _filteredDerivative;
 
             double candidateIntegral = _integral + error * deltaTime;
 
-            double output = Kp * error + Ki * candidateIntegral + Kd * derivative;
+            double output = Kp * error + Ki * candidateIntegral + derivativeTerm;
 
             double clampedOutput = Math.Clamp(output, MinOutput, MaxOutput);
 
@@ -48,10 +64,10 @@ namespace DiplomWork_Ivan_2026.Controllers
                 _integral = candidateIntegral;
             }
 
-            output =  Kp * error + Ki * _integral + Kd * derivative;
+            output = Kp * error + Ki * _integral + derivativeTerm;
 
-            _previousError = error;
-            _hasPreviousError = true;
+            _previousMeasurement = currentValue;
+            _hasPreviousMeasurement = true;
 
             return Math.Clamp(output, MinOutput, MaxOutput);
         }
@@ -59,8 +75,9 @@ namespace DiplomWork_Ivan_2026.Controllers
         public void Reset()
         {
             _integral = 0.0;
-            _previousError = 0.0;
-            _hasPreviousError = false;
+            _previousMeasurement = 0.0;
+            _filteredDerivative = 0.0;
+            _hasPreviousMeasurement = false;
         }
     }
 }
