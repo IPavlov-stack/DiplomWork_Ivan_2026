@@ -8,5 +8,6 @@ namespace DiplomWork_Ivan_2026.Trends
         public string Name { get; set; } = "";
         public List<double> Values { get; set; } = new List<double>();
         public Brush Brush { get; set; } = Brushes.White;
+        public bool AllowSmoothing { get; set; } = true;
     }
 }

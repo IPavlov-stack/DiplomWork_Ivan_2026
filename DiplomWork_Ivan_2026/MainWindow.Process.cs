@@ -15,7 +15,9 @@ namespace DiplomWork_Ivan_2026
 
             if (_process.State.SafetyInterlockActive)
             {
-                MessageBox.Show("Reset the safety interlock before starting the process.");
+                MessageBox.Show(L(
+                    "Reset the safety interlock before starting the process.",
+                    "Нулирайте защитната блокировка преди стартиране на процеса."));
                 return;
             }
 
@@ -23,15 +25,17 @@ namespace DiplomWork_Ivan_2026
             {
                 if (MaterialComboBox.SelectedItem is not DryingMaterial material)
                 {
-                    MessageBox.Show("Please select a material.");
+                    MessageBox.Show(L("Please select a material.", "Моля, изберете материал."));
                     return;
                 }
 
                 if (_settings.TemperatureSetpoint > material.MaxTemperature)
                 {
-                    MessageBox.Show(
+                    MessageBox.Show(L(
                         $"Temperature setpoint {_settings.TemperatureSetpoint:F1} °C exceeds " +
-                        $"the {material.Name} limit {material.MaxTemperature:F1} °C.");
+                        $"the {material.Name} limit {material.MaxTemperature:F1} °C.",
+                        $"Заданието за температура {_settings.TemperatureSetpoint:F1} °C надвишава " +
+                        $"границата за {material}: {material.MaxTemperature:F1} °C."));
                     return;
                 }
 
@@ -66,6 +70,17 @@ namespace DiplomWork_Ivan_2026
 
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
+            if ((_processStarted || _process.State.ElapsedTime > 0.0) &&
+                MessageBox.Show(
+                    L("Reset the process? Current progress and trend history will be cleared.",
+                      "Да се нулира ли процесът? Текущият ход и историята на графиките ще бъдат изтрити."),
+                    L("Reset process", "Нулиране на процеса"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
             _timer.Stop();
             _pidTemperatureController.Reset();
             _pressureController.Reset();
@@ -83,6 +98,7 @@ namespace DiplomWork_Ivan_2026
             _safetyInterlockService.Clear(_process);
 
             _trendBuffer.Clear();
+            _alarmService.CheckAlarms(_process, _settings);
 
             UpdateUi();
         }
@@ -241,9 +257,12 @@ namespace DiplomWork_Ivan_2026
 
         private void EmergencyStopButton_Click(object sender, RoutedEventArgs e)
         {
+            _isRunning = false;
+            _timer.Stop();
             _safetyInterlockService.Trip(
                 _process,
-                "Emergency stop activated by the operator.",
+                L("Emergency stop activated by the operator.",
+                  "Аварийното спиране е задействано от оператора."),
                 true);
             _alarmService.CheckAlarms(_process, _settings);
             UpdateUi();
@@ -259,7 +278,7 @@ namespace DiplomWork_Ivan_2026
                 _settings,
                 out string reason))
             {
-                MessageBox.Show(reason, "Safety reset");
+                MessageBox.Show(reason, L("Safety reset", "Нулиране на защитата"));
                 return;
             }
 

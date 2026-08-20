@@ -1,4 +1,5 @@
 using System;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026.Trends
 {
@@ -21,10 +22,10 @@ namespace DiplomWork_Ivan_2026.Trends
         {
             return SelectMode(visibleSpanSeconds, maximumElapsedSeconds) switch
             {
-                TimeDisplayMode.MinutesSeconds => "Elapsed time [mm:ss]",
-                TimeDisplayMode.HoursMinutesSeconds => "Elapsed time [h:mm:ss]",
-                TimeDisplayMode.HoursMinutes => "Elapsed time [h:mm]",
-                _ => "Elapsed time [d hh:mm]"
+                TimeDisplayMode.MinutesSeconds => LocalizationService.Text("Elapsed time [mm:ss]", "Изминало време [mm:ss]"),
+                TimeDisplayMode.HoursMinutesSeconds => LocalizationService.Text("Elapsed time [h:mm:ss]", "Изминало време [h:mm:ss]"),
+                TimeDisplayMode.HoursMinutes => LocalizationService.Text("Elapsed time [h:mm]", "Изминало време [h:mm]"),
+                _ => LocalizationService.Text("Elapsed time [d hh:mm]", "Изминало време [d hh:mm]")
             };
         }
 
@@ -72,9 +73,9 @@ namespace DiplomWork_Ivan_2026.Trends
                 TimeDisplayMode.HoursMinutes =>
                     $"{totalHours}:{value.Minutes:D2}",
                 TimeDisplayMode.DaysHoursMinutesSeconds =>
-                    $"{(int)value.TotalDays}d {value.Hours:D2}:{value.Minutes:D2}:{value.Seconds:D2}",
+                    $"{(int)value.TotalDays}{LocalizationService.Text("d", "д")} {value.Hours:D2}:{value.Minutes:D2}:{value.Seconds:D2}",
                 _ =>
-                    $"{(int)value.TotalDays}d {value.Hours:D2}:{value.Minutes:D2}"
+                    $"{(int)value.TotalDays}{LocalizationService.Text("d", "д")} {value.Hours:D2}:{value.Minutes:D2}"
             };
         }
 

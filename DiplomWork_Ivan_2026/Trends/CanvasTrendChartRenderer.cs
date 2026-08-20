@@ -82,7 +82,10 @@ namespace DiplomWork_Ivan_2026.Trends
                 Polyline line = new Polyline
                 {
                     Stroke = chartSeries.Brush,
-                    StrokeThickness = 3
+                    StrokeThickness = 3,
+                    StrokeLineJoin = PenLineJoin.Round,
+                    StrokeStartLineCap = PenLineCap.Round,
+                    StrokeEndLineCap = PenLineCap.Round
                 };
 
                 int count = Math.Min(xValues.Count, chartSeries.Values.Count);

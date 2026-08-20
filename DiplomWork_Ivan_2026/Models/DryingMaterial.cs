@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DiplomWork_Ivan_2026.Enums;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026.Models
 {
@@ -63,7 +64,17 @@ namespace DiplomWork_Ivan_2026.Models
         }
         public override string ToString()
         {
-            return Name;
+            if (!LocalizationService.IsBulgarian)
+                return Name;
+
+            return Name switch
+            {
+                "Herbs" => "Билки",
+                "Grain" => "Зърно",
+                "Wood" => "Дървесина",
+                "Fruits" => "Плодове",
+                _ => Name
+            };
         }
     }
 }

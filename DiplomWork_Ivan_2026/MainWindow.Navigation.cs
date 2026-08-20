@@ -1,4 +1,5 @@
 using System.Windows;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -25,8 +26,10 @@ namespace DiplomWork_Ivan_2026
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show(
-                "Are you sure you want to exit the application?",
-                "Exit",
+                LocalizationService.Text(
+                    "Are you sure you want to exit the application?",
+                    "Сигурни ли сте, че искате да излезете от приложението?"),
+                LocalizationService.Text("Exit", "Изход"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 

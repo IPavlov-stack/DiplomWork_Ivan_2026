@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0"
+            <TextBlock x:Name="WindowTitleTextBlock" Grid.Column="0"
                Text="Vacuum Dryer Alarm History"
                Foreground="White"
                FontSize="26"
@@ -64,7 +64,7 @@
                        FontWeight="Bold"
                        Margin="0,0,30,0"/>
 
-            <Button Content="REFRESH"
+            <Button x:Name="RefreshButton" Content="REFRESH"
                     Width="110"
                     Height="32"
                     Background="#1565C0"
@@ -127,7 +127,11 @@
 
                 <DataGridTextColumn Header="Description"
                                     Binding="{Binding Description}"
-                                    Width="*"/>
+                                    Width="2*"/>
+
+                <DataGridTextColumn Header="Recommended action"
+                                    Binding="{Binding RecommendedAction}"
+                                    Width="2*"/>
 
             </DataGrid.Columns>
         </DataGrid>

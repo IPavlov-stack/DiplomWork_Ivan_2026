@@ -2,11 +2,26 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using DiplomWork_Ivan_2026.Enums;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026
 {
     public partial class MainWindow
     {
+        private static readonly Brush SemanticRed =
+            new SolidColorBrush(Color.FromRgb(211, 47, 47));
+        private static readonly Brush SemanticAmber =
+            new SolidColorBrush(Color.FromRgb(249, 168, 37));
+        private static readonly Brush SemanticGreen =
+            new SolidColorBrush(Color.FromRgb(0, 255, 0));
+        private static readonly Brush SemanticBlue =
+            new SolidColorBrush(Color.FromRgb(25, 118, 210));
+        private static readonly Brush SemanticNeutral =
+            new SolidColorBrush(Color.FromRgb(176, 190, 197));
+        private string _selectedProcessObject = "Chamber";
+        private static string L(string english, string bulgarian) =>
+            LocalizationService.Text(english, bulgarian);
+
         private void MaterialComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (!_processStarted)
@@ -21,54 +36,66 @@ namespace DiplomWork_Ivan_2026
 
             if (state.SafetyInterlockActive)
             {
-                StatusValueRun.Text = "SAFETY TRIP";
-                StatusValueRun.Foreground = Brushes.OrangeRed;
+                StatusValueRun.Text = L("SAFETY TRIP", "АВАРИЙНА ЗАЩИТА");
+                StatusValueRun.Foreground = SemanticRed;
             }
             else if (state.IsCompleted)
             {
-                StatusValueRun.Text = "Process completed";
-                StatusValueRun.Foreground = Brushes.DeepSkyBlue;
+                StatusValueRun.Text = L("Process completed", "Процесът е завършен");
+                StatusValueRun.Foreground = SemanticBlue;
             }
             else if (_isRunning)
             {
-                StatusValueRun.Text = "Running";
-                StatusValueRun.Foreground = Brushes.LimeGreen;
+                StatusValueRun.Text = L("Running", "Работи");
+                StatusValueRun.Foreground = SemanticGreen;
             }
             else
             {
-                StatusValueRun.Text = "Stopped";
-                StatusValueRun.Foreground = Brushes.Red;
+                StatusValueRun.Text = _processStarted
+                    ? L("Paused", "Пауза")
+                    : L("Ready", "Готовност");
+                StatusValueRun.Foreground = SemanticNeutral;
             }
 
-            TemperatureTextBlock.Text = $"Chamber Temperature: {state.MeasuredTemperature:F1} °C";
-            MaterialTemperatureTextBlock.Text = $"Material Temperature: {state.MeasuredMaterialTemperature:F1} °C";
+            TemperatureTextBlock.Text =
+                $"{L("Chamber T", "T камера")}   {state.MeasuredTemperature:F1} °C";
+            MaterialTemperatureTextBlock.Text =
+                $"{L("Material T", "T материал")}   {state.MeasuredMaterialTemperature:F1} °C";
+            PressureTextBlock.Text = $"{L("Pressure", "Налягане")}   {state.MeasuredPressure:F1} kPa";
             MoistureTextBlock.Text =
-                $"Material Moisture: {state.MaterialMoistureWetBasisPercent:F1} % wb";
-            PressureTextBlock.Text = $"Pressure: {state.MeasuredPressure:F1} kPa";
-
-            HeaterTextBlock.Text = $"Heater: {state.HeaterPower:F0} %";
-            PumpTextBlock.Text = $"Vacuum Pump: {state.VacuumPumpPower:F0} %";
-            VentValveTextBlock.Text = $"Vent Valve: {state.VentValveOpening:F0} %";
-            FanTextBlock.Text = $"Fan: {state.FanSpeed:F0} %";
-
-            TimeTextBlock.Text = $"Time: {state.ElapsedTime:F0} s";
-            ProcessStageTextBlock.Text = $"Stage: {FormatProcessStage(state.ProcessStage)}";
-            MoistureRatioTextBlock.Text = $"Moisture Ratio: {state.MoistureRatio:F3}";
+                $"{L("Moisture", "Влага")}   {state.MaterialMoistureWetBasisPercent:F1} % wb";
+            HeaterOutputIndicatorTextBlock.Text = $"{L("Power", "Мощност")}   {state.HeaterPower:F0} %";
+            PumpOutputIndicatorTextBlock.Text = $"{L("Power", "Мощност")}   {state.VacuumPumpPower:F0} %";
+            FanOutputIndicatorTextBlock.Text = $"{L("Speed", "Скорост")}   {state.FanSpeed:F0} %";
+            VentOutputIndicatorTextBlock.Text = $"{L("Open", "Отворен")}   {state.VentValveOpening:F0} %";
+            TimeTextBlock.Text = $"{L("Elapsed", "Изминало време")}: {FormatElapsedTime(state.ElapsedTime)}";
+            ProcessStageTextBlock.Text = $"{L("Stage", "Етап")}: {FormatProcessStage(state.ProcessStage)}";
+            MoistureRatioTextBlock.Text = $"{L("Moisture Ratio", "Отношение на влагата")}: {state.MoistureRatio:F3}";
             RemainingTimeTextBlock.Text =
-                $"Estimated Remaining: {FormatRemainingTime(state.EstimatedRemainingTimeSeconds)}";
-            VacuumLevelTextBlock.Text = $"Vacuum Level: {state.VacuumLevel:F1} %";
-            TotalEnergyTextBlock.Text = $"Total Energy: {state.TotalEnergyKWh:F3} kWh";
+                $"{L("Estimated Remaining", "Оставащо време")}: {FormatRemainingTime(state.EstimatedRemainingTimeSeconds)}";
+            VacuumLevelTextBlock.Text = $"{L("Vacuum Level", "Ниво на вакуум")}: {state.VacuumLevel:F1} %";
+            TotalEnergyTextBlock.Text = $"{L("Total Energy", "Обща енергия")}: {state.TotalEnergyKWh:F3} kWh";
+            EfficiencyTextBlock.Text = $"{L("Efficiency", "Ефективност")}: {state.EfficiencyKgPerKWh:F3} kg/kWh";
             SensorStatusTextBlock.Text = _process.HasSensorFault
-                ? "Sensors: FAULT"
-                : "Sensors: OK";
+                ? L("Sensors: FAULT", "Датчици: ПОВРЕДА")
+                : L("Sensors: OK", "Датчици: OK");
             SensorStatusTextBlock.Foreground = _process.HasSensorFault
-                ? Brushes.OrangeRed
-                : Brushes.LightGreen;
+                ? SemanticRed
+                : SemanticGreen;
 
             bool isManualMode = OperationModeComboBox.SelectedIndex == 1;
             ContextPanelModeTextBlock.Text = isManualMode
-                ? "Manual mode: adjustable outputs"
-                : "Auto mode: controller outputs";
+                ? L("Manual mode: adjustable outputs", "Ръчен режим: регулируеми изходи")
+                : L("Auto mode: controller outputs (read-only)", "Автоматичен режим: изходи от регулаторите (само за четене)");
+
+            AutoHeaterProgressBar.Value = state.HeaterPower;
+            AutoPumpProgressBar.Value = state.VacuumPumpPower;
+            AutoVentValveProgressBar.Value = state.VentValveOpening;
+            AutoFanProgressBar.Value = state.FanSpeed;
+            AutoHeaterValueTextBlock.Text = $"{state.HeaterPower:F0} %";
+            AutoPumpValueTextBlock.Text = $"{state.VacuumPumpPower:F0} %";
+            AutoVentValveValueTextBlock.Text = $"{state.VentValveOpening:F0} %";
+            AutoFanValueTextBlock.Text = $"{state.FanSpeed:F0} %";
             if (!isManualMode)
             {
                 ManualHeaterSlider.Value = state.HeaterPower;
@@ -77,49 +104,54 @@ namespace DiplomWork_Ivan_2026
                 ManualFanSlider.Value = state.FanSpeed;
             }
 
-            HeaterLamp.Fill = state.HeaterPower > 0.0
-                ? Brushes.OrangeRed
-                : Brushes.Gray;
-            PumpLamp.Fill = state.VacuumPumpPower > 0.0
-                ? Brushes.DeepSkyBlue
-                : Brushes.Gray;
-            FanLamp.Fill = state.FanSpeed > 0.0
-                ? Brushes.LimeGreen
-                : Brushes.Gray;
-            VentValveLamp.Fill = state.VentValveOpening > 0.0
-                ? Brushes.Gold
-                : Brushes.Gray;
+            HeaterLamp.Fill = state.HeaterPower > 0.0 ? SemanticGreen : Brushes.Gray;
+            PumpLamp.Fill = state.VacuumPumpPower > 0.0 ? SemanticGreen : Brushes.Gray;
+            FanLamp.Fill = state.FanSpeed > 0.0 ? SemanticGreen : Brushes.Gray;
+            VentValveLamp.Fill = state.VentValveOpening > 0.0 ? SemanticGreen : Brushes.Gray;
 
+            SafetyStateTextBlock.Text = state.SafetyInterlockActive
+                ? L("Safety state: TRIPPED", "Състояние на защитата: ЗАДЕЙСТВАНА")
+                : L("Safety state: Normal", "Състояние на защитата: Нормално");
+            SafetyStateTextBlock.Foreground = state.SafetyInterlockActive
+                ? SemanticRed
+                : SemanticGreen;
+
+            UpdateSelectedObjectPanel();
             UpdateAlarmsUi();
             UpdateStartButtonState();
         }
 
         private void UpdateStartButtonState()
         {
+            var state = _process.State;
             bool recipeCanBeChanged = !_processStarted && !_isRunning;
             MaterialComboBox.IsEnabled = recipeCanBeChanged;
             DryingModeComboBox.IsEnabled = recipeCanBeChanged;
 
             if (_process.State.SafetyInterlockActive)
             {
-                StartButton.Content = "SAFETY LOCKED";
+                StartButton.Content = L("SAFETY LOCKED", "БЛОКИРАНО ОТ ЗАЩИТА");
                 StartButton.IsEnabled = false;
             }
             else if (_isRunning)
             {
-                StartButton.Content = "RUNNING";
+                StartButton.Content = L("RUNNING", "РАБОТИ");
                 StartButton.IsEnabled = false;
             }
             else if (_processStarted)
             {
-                StartButton.Content = "RESUME";
+                StartButton.Content = L("Resume", "Продължи");
                 StartButton.IsEnabled = true;
             }
             else
             {
-                StartButton.Content = "START";
+                StartButton.Content = L("Start", "Старт");
                 StartButton.IsEnabled = true;
             }
+
+            StopButton.IsEnabled = _isRunning;
+            ResetButton.IsEnabled = _processStarted || state.ElapsedTime > 0.0 || state.IsCompleted;
+            ResetSafetyButton.IsEnabled = state.SafetyInterlockActive;
         }
 
         private void OperationModeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -139,6 +171,12 @@ namespace DiplomWork_Ivan_2026
 
             bool isManualMode = OperationModeComboBox.SelectedIndex == 1;
 
+            AutoOutputsPanel.Visibility = isManualMode
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            ManualControlsPanel.Visibility = isManualMode
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             ManualHeaterSlider.IsEnabled = isManualMode;
             ManualPumpSlider.IsEnabled = isManualMode;
             ManualVentValveSlider.IsEnabled = isManualMode;
@@ -163,19 +201,167 @@ namespace DiplomWork_Ivan_2026
             ManualFanValueTextBlock.Text = $"{ManualFanSlider.Value:F0} %";
         }
 
+        private void ProcessObject_MouseLeftButtonDown(
+            object sender,
+            System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.Tag is string objectName)
+            {
+                _selectedProcessObject = objectName;
+                UpdateSelectedObjectPanel();
+                e.Handled = true;
+            }
+        }
+
+        private void UpdateSelectedObjectPanel()
+        {
+            if (ContextPanelTitleTextBlock == null)
+                return;
+
+            var state = _process.State;
+            ClearContextValues();
+            string controllerMode = TemperatureControlComboBox?.SelectedIndex == 1
+                ? "PID"
+                : "ON/OFF";
+
+            switch (_selectedProcessObject)
+            {
+                case "Heater":
+                    ContextPanelTitleTextBlock.Text = L("Heater", "Нагревател");
+                    SelectedObjectStatusTextBlock.Text = state.HeaterPower > 0.0
+                        ? L("State: Active", "Състояние: Активен")
+                        : L("State: Off", "Състояние: Изключен");
+                    SelectedObjectStatusTextBlock.Foreground = state.HeaterPower > 0.0
+                        ? SemanticGreen
+                        : SemanticNeutral;
+                    SetContextValue(ContextValue1TextBlock,
+                        $"{L("Heater output", "Изход на нагревателя")}: {state.HeaterPower:F0} %", Brushes.OrangeRed);
+                    SetContextValue(ContextValue2TextBlock,
+                        $"{L("Control", "Управление")}: {controllerMode}", SemanticNeutral);
+                    SetContextValue(ContextValue3TextBlock,
+                        $"{L("Chamber temperature", "Температура в камерата")}: {state.MeasuredTemperature:F1} °C", Brushes.OrangeRed);
+                    SetContextValue(ContextValue4TextBlock,
+                        $"{L("Temperature setpoint", "Задание за температура")}: {state.ActiveTemperatureSetpoint:F1} °C", Brushes.DeepSkyBlue);
+                    break;
+
+                case "Pump":
+                    ContextPanelTitleTextBlock.Text = L("Vacuum Pump", "Вакуумна помпа");
+                    SelectedObjectStatusTextBlock.Text = state.VacuumPumpPower > 0.0
+                        ? L("State: Active", "Състояние: Активна")
+                        : L("State: Off", "Състояние: Изключена");
+                    SelectedObjectStatusTextBlock.Foreground = state.VacuumPumpPower > 0.0
+                        ? SemanticGreen
+                        : SemanticNeutral;
+                    SetContextValue(ContextValue1TextBlock,
+                        $"{L("Pump output", "Изход на помпата")}: {state.VacuumPumpPower:F0} %", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue2TextBlock,
+                        $"{L("Pressure", "Налягане")}: {state.MeasuredPressure:F1} kPa", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue3TextBlock,
+                        $"{L("Pressure setpoint", "Задание за налягане")}: {state.ActivePressureSetpoint:F1} kPa", Brushes.Gold);
+                    SetContextValue(ContextValue4TextBlock,
+                        $"{L("Vacuum level", "Ниво на вакуум")}: {state.VacuumLevel:F1} %", Brushes.DeepSkyBlue);
+                    break;
+
+                case "Fan":
+                    ContextPanelTitleTextBlock.Text = L("Circulation Fan", "Циркулационен вентилатор");
+                    SelectedObjectStatusTextBlock.Text = state.FanSpeed > 0.0
+                        ? L("State: Active", "Състояние: Активен")
+                        : L("State: Off", "Състояние: Изключен");
+                    SelectedObjectStatusTextBlock.Foreground = state.FanSpeed > 0.0
+                        ? SemanticGreen
+                        : SemanticNeutral;
+                    SetContextValue(ContextValue1TextBlock,
+                        $"{L("Fan output", "Изход на вентилатора")}: {state.FanSpeed:F0} %", Brushes.LimeGreen);
+                    SetContextValue(ContextValue2TextBlock,
+                        $"{L("Air flow", "Въздушен дебит")}: {state.AirFlowRate:F1} m³/h", Brushes.LimeGreen);
+                    break;
+
+                case "Vent":
+                    ContextPanelTitleTextBlock.Text = L("Vent Valve", "Вентилационен клапан");
+                    SelectedObjectStatusTextBlock.Text = state.VentValveOpening > 0.0
+                        ? L("State: Open", "Състояние: Отворен")
+                        : L("State: Closed", "Състояние: Затворен");
+                    SelectedObjectStatusTextBlock.Foreground = state.VentValveOpening > 0.0
+                        ? SemanticGreen
+                        : SemanticNeutral;
+                    SetContextValue(ContextValue1TextBlock,
+                        $"{L("Valve opening", "Отваряне на клапана")}: {state.VentValveOpening:F0} %", Brushes.Gold);
+                    SetContextValue(ContextValue2TextBlock,
+                        $"{L("Chamber pressure", "Налягане в камерата")}: {state.MeasuredPressure:F1} kPa", Brushes.DeepSkyBlue);
+                    break;
+
+                default:
+                    ContextPanelTitleTextBlock.Text = L("Vacuum Chamber", "Вакуумна камера");
+                    SelectedObjectStatusTextBlock.Text = state.SafetyInterlockActive
+                        ? L("State: Safety trip", "Състояние: Задействана защита")
+                        : $"{L("Stage", "Етап")}: {FormatProcessStage(state.ProcessStage)}";
+                    SelectedObjectStatusTextBlock.Foreground = state.SafetyInterlockActive
+                        ? SemanticRed
+                        : _isRunning ? SemanticGreen : SemanticNeutral;
+                    string moistureTarget = _process.SelectedMaterial == null
+                        ? "-"
+                        : $"{_process.SelectedMaterial.TargetMoistureWetBasisPercent:F1} % wb";
+                    SetContextValue(ContextValue1TextBlock,
+                        $"{L("Chamber temperature", "Температура в камерата")}: {state.MeasuredTemperature:F1} °C", Brushes.OrangeRed);
+                    SetContextValue(ContextValue2TextBlock,
+                        $"{L("Temperature setpoint", "Задание за температура")}: {state.ActiveTemperatureSetpoint:F1} °C", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue3TextBlock,
+                        $"{L("Material temperature", "Температура на материала")}: {state.MeasuredMaterialTemperature:F1} °C", Brushes.Gold);
+                    SetContextValue(ContextValue4TextBlock,
+                        $"{L("Pressure", "Налягане")}: {state.MeasuredPressure:F1} kPa", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue5TextBlock,
+                        $"{L("Pressure setpoint", "Задание за налягане")}: {state.ActivePressureSetpoint:F1} kPa", Brushes.Gold);
+                    SetContextValue(ContextValue6TextBlock,
+                        $"{L("Material moisture", "Влага на материала")}: {state.MaterialMoistureWetBasisPercent:F1} % wb", Brushes.LimeGreen);
+                    SetContextValue(ContextValue7TextBlock,
+                        $"{L("Moisture target", "Целева влага")}: {moistureTarget}", Brushes.Gold);
+                    break;
+            }
+        }
+
+        private void ClearContextValues()
+        {
+            System.Windows.Controls.TextBlock[] valueBlocks =
+            {
+                ContextValue1TextBlock,
+                ContextValue2TextBlock,
+                ContextValue3TextBlock,
+                ContextValue4TextBlock,
+                ContextValue5TextBlock,
+                ContextValue6TextBlock,
+                ContextValue7TextBlock
+            };
+
+            foreach (var block in valueBlocks)
+            {
+                block.Text = "";
+                block.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private static void SetContextValue(
+            System.Windows.Controls.TextBlock block,
+            string text,
+            Brush foreground)
+        {
+            block.Text = text;
+            block.Foreground = foreground;
+            block.Visibility = Visibility.Visible;
+        }
+
         private static string FormatProcessStage(Enums.ProcessStage stage)
         {
             return stage switch
             {
-                Enums.ProcessStage.Preheating => "Preheating",
-                Enums.ProcessStage.Evacuation => "Evacuation",
-                Enums.ProcessStage.Drying => "Drying",
-                Enums.ProcessStage.FinalDrying => "Final drying",
-                Enums.ProcessStage.Venting => "Pressure recovery",
-                Enums.ProcessStage.SafetyShutdown => "Safety shutdown",
-                Enums.ProcessStage.Completed => "Completed",
-                Enums.ProcessStage.Manual => "Manual control",
-                _ => "Idle"
+                Enums.ProcessStage.Preheating => L("Preheating", "Предварително нагряване"),
+                Enums.ProcessStage.Evacuation => L("Evacuation", "Вакуумиране"),
+                Enums.ProcessStage.Drying => L("Drying", "Сушене"),
+                Enums.ProcessStage.FinalDrying => L("Final drying", "Финално сушене"),
+                Enums.ProcessStage.Venting => L("Pressure recovery", "Възстановяване на налягането"),
+                Enums.ProcessStage.SafetyShutdown => L("Safety shutdown", "Аварийно изключване"),
+                Enums.ProcessStage.Completed => L("Completed", "Завършен"),
+                Enums.ProcessStage.Manual => L("Manual control", "Ръчно управление"),
+                _ => L("Idle", "Готовност")
             };
         }
 
@@ -185,16 +371,27 @@ namespace DiplomWork_Ivan_2026
                 double.IsNaN(seconds.Value) ||
                 double.IsInfinity(seconds.Value))
             {
-                return "calculating...";
+                return L("calculating...", "изчислява се...");
             }
 
             TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(0.0, seconds.Value));
             if (remaining.TotalDays >= 1.0)
-                return $"{(int)remaining.TotalDays}d {remaining.Hours:D2}h";
+                return LocalizationService.IsBulgarian
+                    ? $"{(int)remaining.TotalDays}д {remaining.Hours:D2}ч"
+                    : $"{(int)remaining.TotalDays}d {remaining.Hours:D2}h";
             if (remaining.TotalHours >= 1.0)
                 return $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
 
             return $"{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+        }
+
+        private static string FormatElapsedTime(double seconds)
+        {
+            TimeSpan elapsed = TimeSpan.FromSeconds(Math.Max(0.0, seconds));
+            if (elapsed.TotalDays >= 1.0)
+                return $"{(int)elapsed.TotalDays}{L("d", "д")} {elapsed.Hours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
+
+            return $"{(int)elapsed.TotalHours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
         }
 
         private void UpdateAlarmsUi()
@@ -204,22 +401,41 @@ namespace DiplomWork_Ivan_2026
 
             if (_alarmService.ActiveAlarms.Count == 0)
             {
-                AlarmsTextBlock.Text = "No active alarms";
-                AlarmsTextBlock.Foreground = Brushes.LightGreen;
+                AlarmsTextBlock.Text = L("No active alarms", "Няма активни аларми");
+                AlarmsTextBlock.Foreground = SemanticGreen;
+                ShowAlarmsButton.Content = L("ALARMS", "АЛАРМИ");
+                ShowAlarmsButton.Background = SemanticBlue;
                 return;
             }
 
-            AlarmsTextBlock.Text = string.Join(
-                "\n",
-                _alarmService.ActiveAlarms.Select(a => $"[{a.Severity}] {a.Message}")
-            );
+            var highestAlarm = _alarmService.ActiveAlarms[0];
+            string additionalAlarmText = _alarmService.ActiveAlarms.Count > 1
+                ? $"\n+{_alarmService.ActiveAlarms.Count - 1} " +
+                  L("more active alarm(s)", "още активни аларми")
+                : "";
+            string severityText = highestAlarm.Severity switch
+            {
+                AlarmSeverity.Critical => L("CRITICAL", "КРИТИЧНА"),
+                AlarmSeverity.Warning => L("WARNING", "ПРЕДУПРЕЖДЕНИЕ"),
+                _ => L("INFO", "ИНФОРМАЦИЯ")
+            };
+            AlarmsTextBlock.Text =
+                $"{highestAlarm.Time:HH:mm:ss}  {severityText}\n" +
+                highestAlarm.LocalizedMessage +
+                (string.IsNullOrWhiteSpace(highestAlarm.LocalizedRecommendedAction)
+                    ? ""
+                    : $"\n{L("Action", "Действие")}: {highestAlarm.LocalizedRecommendedAction}") +additionalAlarmText;
 
-            bool hasCritical = _alarmService.ActiveAlarms
-                .Any(a => a.Severity == AlarmSeverity.Critical);
+            bool hasCritical = _alarmService.ActiveAlarms.Any(a => a.Severity == AlarmSeverity.Critical);
+            bool hasWarning = _alarmService.ActiveAlarms.Any(a => a.Severity == AlarmSeverity.Warning);
 
             AlarmsTextBlock.Foreground = hasCritical
-                ? Brushes.OrangeRed
-                : Brushes.Gold;
+                ? SemanticRed
+                : hasWarning ? SemanticAmber : SemanticBlue;
+            ShowAlarmsButton.Content =$"{L("ALARMS", "АЛАРМИ")} ({_alarmService.ActiveAlarms.Count})";
+            ShowAlarmsButton.Background = hasCritical
+                ? SemanticRed
+                : hasWarning ? SemanticAmber : SemanticBlue;
         }
     }
 }

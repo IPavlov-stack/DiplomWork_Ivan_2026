@@ -57,6 +57,11 @@ namespace DiplomWork_Ivan_2026
 
             _timer.Interval = System.TimeSpan.FromSeconds(1);
             _timer.Tick += Timer_Tick;
+
+            LocalizationService.LanguageChanged += LocalizationService_LanguageChanged;
+            Closed += (_, _) =>
+                LocalizationService.LanguageChanged -= LocalizationService_LanguageChanged;
+            ApplyLocalization();
         }
 
         private void InitializeChart()

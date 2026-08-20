@@ -8,6 +8,7 @@ namespace DiplomWork_Ivan_2026.Services
     {
         private const double MinimumSafePressureKPa = 5.1;
         private const double VacuumEstablishmentTimeoutSeconds = 600.0;
+        private static string L(string en, string bg) => LocalizationService.Text(en, bg);
 
         public bool Evaluate(
             VacuumDryerProcess process,
@@ -21,27 +22,33 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (process.HasSensorFault)
             {
-                Trip(process, "A critical virtual sensor is in a fault state.");
+                Trip(process, L(
+                    "A critical virtual sensor is in a fault state.",
+                    "Критичен виртуален датчик е в състояние на повреда."));
             }
             else if (settings.TemperatureSetpoint > material.MaxTemperature)
             {
                 Trip(
                     process,
-                    $"Temperature setpoint {settings.TemperatureSetpoint:F1} °C " +
-                    $"exceeds the {material.Name} limit {material.MaxTemperature:F1} °C.");
+                    L(
+                        $"Temperature setpoint {settings.TemperatureSetpoint:F1} °C exceeds the {material.Name} limit {material.MaxTemperature:F1} °C.",
+                        $"Заданието за температура {settings.TemperatureSetpoint:F1} °C надвишава границата за {material}: {material.MaxTemperature:F1} °C."));
             }
             else if (state.MeasuredMaterialTemperature > material.MaxTemperature)
             {
                 Trip(
                     process,
-                    $"Material temperature {state.MeasuredMaterialTemperature:F1} °C " +
-                    $"exceeds the limit {material.MaxTemperature:F1} °C.");
+                    L(
+                        $"Material temperature {state.MeasuredMaterialTemperature:F1} °C exceeds the limit {material.MaxTemperature:F1} °C.",
+                        $"Температурата на материала {state.MeasuredMaterialTemperature:F1} °C надвишава границата {material.MaxTemperature:F1} °C."));
             }
             else if (state.MeasuredPressure <= MinimumSafePressureKPa)
             {
                 Trip(
                     process,
-                    $"Absolute pressure {state.MeasuredPressure:F1} kPa is below the safe limit.");
+                    L(
+                        $"Absolute pressure {state.MeasuredPressure:F1} kPa is below the safe limit.",
+                        $"Абсолютното налягане {state.MeasuredPressure:F1} kPa е под безопасната граница."));
             }
             else if (state.ProcessStage == ProcessStage.Evacuation &&
                 state.StageElapsedTime >= VacuumEstablishmentTimeoutSeconds &&
@@ -49,7 +56,9 @@ namespace DiplomWork_Ivan_2026.Services
             {
                 Trip(
                     process,
-                    "The requested vacuum was not established within the allowed time.");
+                    L(
+                        "The requested vacuum was not established within the allowed time.",
+                        "Зададеният вакуум не е достигнат в допустимото време."));
             }
 
             return state.SafetyInterlockActive;
@@ -78,27 +87,35 @@ namespace DiplomWork_Ivan_2026.Services
 
             if (process.HasSensorFault)
             {
-                reason = "Clear the virtual sensor fault before resetting safety.";
+                reason = L(
+                    "Clear the virtual sensor fault before resetting safety.",
+                    "Отстранете повредата на виртуалния датчик преди нулиране на защитата.");
                 return false;
             }
 
             if (material != null &&
                 state.MeasuredMaterialTemperature > material.MaxTemperature)
             {
-                reason = "Material temperature is still above the safe limit.";
+                reason = L(
+                    "Material temperature is still above the safe limit.",
+                    "Температурата на материала все още е над безопасната граница.");
                 return false;
             }
 
             if (state.MeasuredPressure <= MinimumSafePressureKPa)
             {
-                reason = "Pressure is still below the safe reset limit.";
+                reason = L(
+                    "Pressure is still below the safe reset limit.",
+                    "Налягането все още е под границата за безопасно нулиране.");
                 return false;
             }
 
             if (material != null &&
                 settings.TemperatureSetpoint > material.MaxTemperature)
             {
-                reason = "Reduce the temperature setpoint before resetting safety.";
+                reason = L(
+                    "Reduce the temperature setpoint before resetting safety.",
+                    "Намалете заданието за температура преди нулиране на защитата.");
                 return false;
             }
 
