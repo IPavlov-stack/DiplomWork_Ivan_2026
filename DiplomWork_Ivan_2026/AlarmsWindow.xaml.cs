@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Services;
+using DiplomWork_Ivan_2026.Enums;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -20,8 +21,19 @@ namespace DiplomWork_Ivan_2026
             _refreshTimer.Tick += RefreshTimer_Tick;
             _refreshTimer.Start();
 
+            LocalizationService.LanguageChanged += LocalizationService_LanguageChanged;
+            ApplyLocalization();
+
             UpdateAlarmTable();
         }
+
+        private void LocalizationService_LanguageChanged(object? sender, EventArgs e)
+        {
+            ApplyLocalization();
+            UpdateAlarmTable();
+        }
+
+        private void ApplyLocalization() => LocalizationService.ApplyStaticText(this);
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
@@ -31,6 +43,7 @@ namespace DiplomWork_Ivan_2026
         protected override void OnClosed(EventArgs e)
         {
             _refreshTimer.Stop();
+            LocalizationService.LanguageChanged -= LocalizationService_LanguageChanged;
             base.OnClosed(e);
         }
 
@@ -56,23 +69,47 @@ namespace DiplomWork_Ivan_2026
             var rows = _alarmService.AlarmHistory
                 .Select(a => new AlarmRow
                 {
-                    Status = a.IsActive ? "ACTIVE" : "CLEARED",
-                    Priority = a.Severity.ToString(),
+                    Status = a.IsActive
+                        ? LocalizationService.Text("ACTIVE", "АКТИВНА")
+                        : LocalizationService.Text("CLEARED", "ИЗЧИСТЕНА"),
+                    Priority = LocalizeSeverity(a.Severity),
                     Date = a.Time.ToString("dd.MM.yyyy"),
                     Time = a.Time.ToString("HH:mm:ss"),
-                    Type = a.Type.ToString(),
-                    Description = a.Message
+                    Type = LocalizeAlarmType(a.Type),
+                    Description = a.LocalizedMessage,
+                    RecommendedAction = a.LocalizedRecommendedAction
                 })
                 .ToList();
 
             AlarmHistoryDataGrid.ItemsSource = rows;
 
             ActiveAlarmsCountTextBlock.Text =
-                $"Active alarms: {_alarmService.ActiveAlarms.Count}";
+                $"{LocalizationService.Text("Active alarms", "Активни аларми")}: {_alarmService.ActiveAlarms.Count}";
 
             TotalAlarmsCountTextBlock.Text =
-                $"Total alarms: {_alarmService.AlarmHistory.Count}";
+                $"{LocalizationService.Text("Total alarms", "Общо аларми")}: {_alarmService.AlarmHistory.Count}";
         }
+
+        private static string LocalizeSeverity(AlarmSeverity severity) => severity switch
+        {
+            AlarmSeverity.Critical => LocalizationService.Text("Critical", "Критична"),
+            AlarmSeverity.Warning => LocalizationService.Text("Warning", "Предупреждение"),
+            _ => LocalizationService.Text("Info", "Информация")
+        };
+
+        private static string LocalizeAlarmType(AlarmType type) => type switch
+        {
+            AlarmType.HighTemperature => LocalizationService.Text("High Temperature", "Висока температура"),
+            AlarmType.SetpointAboveMaterialLimit => LocalizationService.Text("Setpoint Above Material Limit", "Задание над границата на материала"),
+            AlarmType.PressureTooHigh => LocalizationService.Text("Pressure Too High", "Твърде високо налягане"),
+            AlarmType.PressureTooLow => LocalizationService.Text("Pressure Too Low", "Твърде ниско налягане"),
+            AlarmType.VacuumTimeout => LocalizationService.Text("Vacuum Timeout", "Изтекло време за вакуумиране"),
+            AlarmType.SafetyInterlock => LocalizationService.Text("Safety Interlock", "Защитна блокировка"),
+            AlarmType.EmergencyStop => LocalizationService.Text("Emergency Stop", "Аварийно спиране"),
+            AlarmType.SensorFault => LocalizationService.Text("Sensor Fault", "Повреда на датчик"),
+            AlarmType.ProcessCompleted => LocalizationService.Text("Process Completed", "Процесът е завършен"),
+            _ => type.ToString()
+        };
 
         private class AlarmRow
         {
@@ -82,6 +119,7 @@ namespace DiplomWork_Ivan_2026
             public string Time { get; set; } = "";
             public string Type { get; set; } = "";
             public string Description { get; set; } = "";
+            public string RecommendedAction { get; set; } = "";
         }
     }
 }

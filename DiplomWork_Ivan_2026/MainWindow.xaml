@@ -14,7 +14,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="300"/>
         </Grid.ColumnDefinitions>
         <!-- LEFT CONTROL PANEL -->
         <Border Grid.Column="0"
@@ -95,106 +95,129 @@
                                TextWrapping="Wrap"
                                Margin="0,0,0,5"/>
 
-                    <!-- START / STOP buttons on one row -->
-                    <Grid Margin="0,15,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <Border Margin="0,15,0,0" Padding="10"
+                            BorderBrush="#455A64" BorderThickness="1" CornerRadius="4">
+                        <StackPanel>
+                            <TextBlock Text="Process control" Foreground="White"
+                               FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Button x:Name="StartButton"
+                                <Button x:Name="StartButton"
                                 Grid.Column="0"
-                                Content="START"
+                                Content="Start"
                                 Height="42"
                                 FontWeight="Bold"
                                 Margin="0,0,5,0"
                                 Click="StartButton_Click">
 
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#2E7D32"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="BorderBrush" Value="#1B5E20"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="#2E7D32"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="#1B5E20"/>
+                                            <Setter Property="BorderThickness" Value="1"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
                                                         BorderBrush="{TemplateBinding BorderBrush}"
                                                         BorderThickness="{TemplateBinding BorderThickness}"
                                                         CornerRadius="2">
-                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                            <ContentPresenter HorizontalAlignment="Center"
                                                       VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
 
-                                    <Style.Triggers>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Background" Value="#111111"/>
-                                            <Setter Property="Foreground" Value="#777777"/>
-                                            <Setter Property="BorderBrush" Value="#333333"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Background" Value="#111111"/>
+                                                    <Setter Property="Foreground" Value="#777777"/>
+                                                    <Setter Property="BorderBrush" Value="#333333"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
 
-                        <Button x:Name="StopButton"
+                                <Button x:Name="StopButton"
                                 Grid.Column="1"
-                                Content="STOP"
+                                Content="Pause"
                                 Height="42"
                                 FontWeight="Bold"
-                                Background="#C62828"
+                                Background="#455A64"
                                 Foreground="White"
                                 Margin="5,0,0,0"
+                                IsEnabled="False"
+                                ToolTip="Pause the simulation and set all actuator outputs to zero. The batch can be resumed."
                                 Click="StopButton_Click"/>
-                    </Grid>
+                            </Grid>
 
-                    <!-- RESET button under START / STOP -->
-                    <Button x:Name="ResetButton"
-                        Content="RESTART"
+                            <!-- RESET button under START / STOP -->
+                            <Button x:Name="ResetButton"
+                        Content="Reset Process"
                         Height="42"
                         FontWeight="Bold"
-                        Background="#F57C00"
+                        Background="#455A64"
                         Foreground="White"
                         Margin="0,10,0,0"
+                        IsEnabled="False"
+                        ToolTip="Clear the current batch progress and trend history."
                         Click="ResetButton_Click"/>
+                        </StackPanel>
+                    </Border>
 
-                    <Button x:Name="EmergencyStopButton"
+                    <Border Margin="0,10,0,0" Padding="10"
+                            BorderBrush="#8E2424" BorderThickness="1" CornerRadius="4">
+                        <StackPanel>
+                            <TextBlock Text="Safety" Foreground="White"
+                               FontSize="15" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="SafetyStateTextBlock"
+                               Text="Safety state: Normal" Foreground="#00FF00"
+                               FontSize="12" Margin="0,2,0,8"/>
+                            <Button x:Name="EmergencyStopButton"
                             Content="EMERGENCY STOP"
                             Height="48"
                             FontWeight="Bold"
                             Background="#B71C1C"
                             Foreground="White"
-                            Margin="0,10,0,0"
+                            Margin="0"
                             Click="EmergencyStopButton_Click"/>
 
-                    <Button x:Name="ResetSafetyButton"
-                            Content="RESET SAFETY"
+                            <Button x:Name="ResetSafetyButton"
+                            Content="Reset Safety"
                             Height="38"
                             FontWeight="Bold"
-                            Background="#795548"
+                            Background="#F9A825"
                             Foreground="White"
                             Margin="0,8,0,0"
+                            IsEnabled="False"
+                            ToolTip="Available after a safety trip and only when safe reset conditions are met."
                             Click="ResetSafetyButton_Click"/>
+                        </StackPanel>
+                    </Border>
+
                 </StackPanel>
             </ScrollViewer>
         </Border>
 
-            <!-- RIGHT HMI AREA -->
-            <Grid Grid.Column="1" Margin="20,0,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="70"/>
-                    <RowDefinition Height="304*"/>
-                    <RowDefinition Height="11*"/>
-                    <RowDefinition Height="31.4"/>
-                    <RowDefinition Height="138.6"/>
-                </Grid.RowDefinitions>
+        <!-- RIGHT HMI AREA -->
+        <Grid Grid.Column="1" Margin="20,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="304*"/>
+                <RowDefinition Height="11*"/>
+                <RowDefinition Height="31.4"/>
+                <RowDefinition Height="138.6"/>
+            </Grid.RowDefinitions>
 
-                <!-- STATUS HEADER -->
-                <Border Grid.Row="0"
+            <!-- STATUS HEADER -->
+            <Border Grid.Row="0"
             Background="#252525"
             CornerRadius="5"
             Padding="15"
@@ -211,9 +234,10 @@
                                Grid.Column="0"
                                FontSize="24"
                                FontWeight="Bold"
+                               HorizontalAlignment="Left"
                                VerticalAlignment="Center">
-                        <Run Text="Status: " Foreground="White"/>
-                        <Run x:Name="StatusValueRun" Text="Stopped" Foreground="Red"/>
+                        <Run x:Name="StatusLabelRun" Text="Status: " Foreground="White"/>
+                        <Run x:Name="StatusValueRun" Text="Ready" Foreground="#B0BEC5"/>
                     </TextBlock>
 
                     <TextBlock x:Name="ProcessStageTextBlock"
@@ -223,7 +247,7 @@
                                FontSize="20"
                                FontWeight="SemiBold"
                                HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
+                               VerticalAlignment="Center" Width="203"/>
 
                     <StackPanel Grid.Column="2"
                                 Orientation="Horizontal"
@@ -257,10 +281,19 @@
                     CornerRadius="6"
                     Margin="-4,15,14,15" Grid.RowSpan="2">
 
+                <Grid>
                 <Canvas>
-
-                    <!-- Main vacuum chamber -->
-                    <Border Canvas.Left="330"
+                    <TextBlock x:Name="TimeTextBlock"
+                               Canvas.Left="15" Canvas.Top="15"
+                               Text="Elapsed: 00:00:00"
+                               Foreground="White"
+                               FontSize="18"
+                               FontWeight="SemiBold"/>
+                    <!-- Цялата схема - за бързо преместване -->
+                    <Canvas Canvas.Left="0" Canvas.Top="70"
+                            Width="850" Height="500">
+                        <!-- Main vacuum chamber -->
+                        <Border Canvas.Left="330"
                             Canvas.Top="90"
                             Width="190"
                             Height="260"
@@ -269,89 +302,122 @@
                             BorderThickness="3"
                             CornerRadius="45">
 
-                        <StackPanel VerticalAlignment="Center"
+                            <StackPanel VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                            <TextBlock Text="VACUUM"
+                                <TextBlock Text="VACUUM"
                                        Foreground="White"
                                        FontWeight="Bold"
                                        FontSize="18"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="DRYER"
+                                <TextBlock Text="DRYER"
                                        Foreground="White"
                                        FontWeight="Bold"
                                        FontSize="18"
                                        HorizontalAlignment="Center"/>
-                            <TextBlock Text="CHAMBER"
+                                <TextBlock Text="CHAMBER"
                                        Foreground="LightGray"
                                        FontSize="13"
                                        HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
+                                <Separator Margin="12,5" Background="#666"/>
+                                <Border Width="158" Height="25" Margin="0,1"
+                                    Background="#151515" BorderBrush="White"
+                                    BorderThickness="1.5" CornerRadius="2">
+                                    <TextBlock x:Name="TemperatureTextBlock"
+                                           Text="Chamber T   20.0 °C" Foreground="OrangeRed"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Width="158" Height="25" Margin="0,1"
+                                    Background="#151515" BorderBrush="White"
+                                    BorderThickness="1.5" CornerRadius="2">
+                                    <TextBlock x:Name="MaterialTemperatureTextBlock"
+                                           Text="Material T   20.0 °C" Foreground="Gold"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Width="158" Height="25" Margin="0,1"
+                                    Background="#151515" BorderBrush="White"
+                                    BorderThickness="1.5" CornerRadius="2">
+                                    <TextBlock x:Name="PressureTextBlock"
+                                           Text="Pressure   101.3 kPa" Foreground="DeepSkyBlue"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Width="158" Height="25" Margin="0,1"
+                                    Background="#151515" BorderBrush="White"
+                                    BorderThickness="1.5" CornerRadius="2">
+                                    <TextBlock x:Name="MoistureTextBlock"
+                                           Text="Moisture   60.0 % wb" Foreground="LimeGreen"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Heater -->
-                    <Rectangle Canvas.Left="65"
-                               Canvas.Top="170"
+                        <!-- Heater -->
+                        <Rectangle Canvas.Left="65"
+                               Canvas.Top="110"
                                Width="130"
                                Height="70"
                                Fill="#444"
                                Stroke="#AAAAAA"
-                               StrokeThickness="2"/>
-                    <TextBlock Canvas.Left="92"
-                               Canvas.Top="195"
+                               StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        <TextBlock Canvas.Left="104"
+                               Canvas.Top="135"
                                Text="HEATER"
                                Foreground="White"
-                               FontWeight="Bold"/>
+                               FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-                    <!-- Heater pipe -->
-                    <Line Canvas.Left="195"
-                          Canvas.Top="205"
+                        <!-- Heater pipe -->
+                        <Line Canvas.Left="195"
+                          Canvas.Top="145"
                           X1="0"
                           Y1="0"
                           X2="135"
                           Y2="0"
                           Stroke="#CC3300"
-                          StrokeThickness="8"/>
+                          StrokeThickness="8" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-                    <!-- Fan -->
-                    <Ellipse Canvas.Left="205"
-                             Canvas.Top="255"
+                        <!-- Fan -->
+                        <Ellipse Canvas.Left="205"
+                             Canvas.Top="265"
                              Width="80"
                              Height="80"
                              Fill="#444"
                              Stroke="#AAAAAA"
-                             StrokeThickness="2"/>
-                    <TextBlock Canvas.Left="230"
-                               Canvas.Top="285"
+                             StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        <TextBlock Canvas.Left="233"
+                               Canvas.Top="296"
                                Text="FAN"
                                Foreground="White"
-                               FontWeight="Bold"/>
+                               FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-                    <!-- Fan pipe -->
-                    <Line Canvas.Left="285"
-                          Canvas.Top="295"
+                        <!-- Fan pipe -->
+                        <Line Canvas.Left="285"
+                          Canvas.Top="305"
                           X1="0"
                           Y1="0"
                           X2="45"
                           Y2="0"
                           Stroke="#4FC3F7"
-                          StrokeThickness="6"/>
+                          StrokeThickness="6" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-                    <!-- Vacuum pump -->
-                    <Ellipse Canvas.Left="620"
+                        <!-- Vacuum pump -->
+                        <Ellipse Canvas.Left="620"
                              Canvas.Top="165"
                              Width="110"
                              Height="110"
                              Fill="#444"
                              Stroke="#AAAAAA"
                              StrokeThickness="2" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <TextBlock Canvas.Left="652"
-                               Canvas.Top="205"
+                        <TextBlock Canvas.Left="658"
+                               Canvas.Top="208"
                                Text="PUMP"
                                Foreground="White"
-                               FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                               FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
-                    <!-- Pump pipe -->
-                    <Line Canvas.Left="520"
+                        <!-- Pump pipe -->
+                        <Line Canvas.Left="520"
                           Canvas.Top="220"
                           X1="0"
                           Y1="0"
@@ -360,8 +426,8 @@
                           Stroke="#4FC3F7"
                           StrokeThickness="8" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-                    <!-- Exhaust line -->
-                    <Line Canvas.Left="730"
+                        <!-- Exhaust line -->
+                        <Line Canvas.Left="730"
                           Canvas.Top="220"
                           X1="0"
                           Y1="0"
@@ -369,13 +435,13 @@
                           Y2="0"
                           Stroke="#4FC3F7"
                           StrokeThickness="6" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <TextBlock Canvas.Left="760"
+                        <TextBlock Canvas.Left="760"
                                Canvas.Top="190"
                                Text="Vacuum line"
                                Foreground="LightGray" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-                    <!-- Controlled vent valve -->
-                    <Line Canvas.Left="425"
+                        <!-- Controlled vent valve -->
+                        <Line Canvas.Left="425"
                           Canvas.Top="35"
                           X1="0"
                           Y1="0"
@@ -383,102 +449,137 @@
                           Y2="55"
                           Stroke="#B0BEC5"
                           StrokeThickness="6"/>
-                    <Rectangle Canvas.Left="395"
+                        <Rectangle Canvas.Left="395"
                                Canvas.Top="15"
                                Width="60"
                                Height="25"
                                Fill="#444"
                                Stroke="#AAAAAA"
                                StrokeThickness="2"/>
-                    <TextBlock Canvas.Left="405"
+                        <TextBlock Canvas.Left="405"
                                Canvas.Top="19"
                                Text="VENT"
                                Foreground="White"
                                FontWeight="Bold"/>
-                    <Ellipse x:Name="VentValveLamp"
-                             Canvas.Left="465"
-                             Canvas.Top="17"
+                        <Ellipse x:Name="VentValveLamp"
+                             Canvas.Left="368"
+                             Canvas.Top="-30"
                              Width="22"
                              Height="22"
                              Fill="Gray"
-                             Stroke="White"/>
+                             Stroke="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
-                    <!-- Sensor labels near chamber -->
-                    <Border Canvas.Left="313"
-                            Canvas.Top="394"
-                            Background="#2A2A2A"
-                            BorderBrush="#555"
-                            BorderThickness="1"
-                            Padding="10">
-
-                        <StackPanel>
-                            <TextBlock x:Name="TemperatureTextBlock"
-                                       Text="Chamber Temperature: 20.0 °C"
-                                       Foreground="White"
-                                       FontSize="15"/>
-
-                            <TextBlock x:Name="MaterialTemperatureTextBlock"
-                                       Text="Material Temperature: 20.0 °C"
-                                       Foreground="White"
-                                       FontSize="15"/>
-
-                            <TextBlock x:Name="PressureTextBlock"
-                                       Text="Pressure: 101.3 kPa"
-                                       Foreground="White"
-                                       FontSize="15"/>
-
-                            <TextBlock x:Name="MoistureTextBlock"
-                                       Text="Material Moisture: 60.0 %"
-                                       Foreground="White"
-                                       FontSize="15"/>
-                        </StackPanel>
-                    </Border>
-
-
-                    <!-- Status lamps -->
-                    <Ellipse x:Name="HeaterLamp"
-                             Canvas.Left="105"
-                             Canvas.Top="250"
+                        <!-- Status lamps -->
+                        <Ellipse x:Name="HeaterLamp"
+                             Canvas.Left="50"
+                             Canvas.Top="202"
                              Width="22"
                              Height="22"
                              Fill="Gray"
-                             Stroke="White"/>
-                    <TextBlock Canvas.Left="135"
-                               Canvas.Top="250"
-                               Text="Heater"
-                               Foreground="White"/>
+                             Stroke="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
-                    <Ellipse x:Name="FanLamp"
-                             Canvas.Left="220"
-                             Canvas.Top="345"
+                        <Ellipse x:Name="FanLamp"
+                             Canvas.Left="159"
+                             Canvas.Top="363"
                              Width="22"
                              Height="22"
                              Fill="Gray"
-                             Stroke="White"/>
-                    <TextBlock Canvas.Left="250"
-                               Canvas.Top="345"
-                               Text="Fan"
-                               Foreground="White"/>
+                             Stroke="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-                    <Ellipse x:Name="PumpLamp"
-                             Canvas.Left="660"
-                             Canvas.Top="290"
+                        <Ellipse x:Name="PumpLamp"
+                             Canvas.Left="589"
+                             Canvas.Top="293"
                              Width="22"
                              Height="22"
                              Fill="Gray"
-                             Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <TextBlock Canvas.Left="690"
-                               Canvas.Top="290"
-                               Text="Pump"
-                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                             Stroke="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
+                        <!-- Digital HMI indicators: one live value per field -->
+                        <Border Canvas.Left="80" Canvas.Top="194" Width="145" Height="38"
+                            Background="#151515" BorderBrush="White"
+                            BorderThickness="1.5" CornerRadius="2">
+                            <TextBlock x:Name="HeaterOutputIndicatorTextBlock"
+                                   Text="Power   0 %" Foreground="OrangeRed"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Canvas.Left="190" Canvas.Top="355" Width="126" Height="38"
+                            Background="#151515" BorderBrush="White"
+                            BorderThickness="1.5" CornerRadius="2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <TextBlock x:Name="FanOutputIndicatorTextBlock"
+                                   Text="Speed   0 %" Foreground="LimeGreen"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Canvas.Left="620" Canvas.Top="287" Width="130" Height="38"
+                            Background="#151515" BorderBrush="White"
+                            BorderThickness="1.5" CornerRadius="2">
+                            <TextBlock x:Name="PumpOutputIndicatorTextBlock"
+                                   Text="Power   0 %" Foreground="DeepSkyBlue"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Border Canvas.Left="395" Canvas.Top="-35" Width="120" Height="32"
+                            Background="#151515" BorderBrush="White"
+                            BorderThickness="1.5" CornerRadius="2">
+                            <TextBlock x:Name="VentOutputIndicatorTextBlock"
+                                   Text="Open   0 %" Foreground="Gold"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+
+                        <Rectangle Canvas.Left="330" Canvas.Top="90" Width="190" Height="260"
+                               Fill="#01000000" Cursor="Hand" Tag="Chamber"
+                               ToolTip="Show chamber measurements and state"
+                               MouseLeftButtonDown="ProcessObject_MouseLeftButtonDown"/>
+                        <Rectangle Canvas.Left="55" Canvas.Top="110" Width="170" Height="122"
+                               Fill="#01000000" Cursor="Hand" Tag="Heater"
+                               ToolTip="Show heater information"
+                               MouseLeftButtonDown="ProcessObject_MouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <Rectangle Canvas.Left="195" Canvas.Top="265" Width="121" Height="128"
+                               Fill="#01000000" Cursor="Hand" Tag="Fan"
+                               ToolTip="Show circulation fan information"
+                               MouseLeftButtonDown="ProcessObject_MouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <Rectangle Canvas.Left="611" Canvas.Top="160" Width="135" Height="169"
+                               Fill="#01000000" Cursor="Hand" Tag="Pump"
+                               ToolTip="Show vacuum pump information"
+                               MouseLeftButtonDown="ProcessObject_MouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
+                            <Rectangle.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform AngleY="-1.004"/>
+                                    <RotateTransform/>
+                                    <TranslateTransform Y="-1.182"/>
+                                </TransformGroup>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle Canvas.Left="335" Canvas.Top="-53" Width="196" Height="93"
+                               Fill="#01000000" Cursor="Hand" Tag="Vent"
+                               ToolTip="Show vent valve information"
+                               MouseLeftButtonDown="ProcessObject_MouseLeftButtonDown" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+                    </Canvas>
                 </Canvas>
+                    <Button x:Name="LanguageButton"
+                            Content="Български"
+                            Width="152"
+                            Height="38"
+                            Margin="0,12,12,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="10"
+                            Background="#455A64"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            Click="LanguageButton_Click"/>
+                </Grid>
             </Border>
 
 
 
-                            <!-- BOTTOM MEASUREMENTS PANEL -->
-                            <Border Grid.Row="3"
+            <!-- BOTTOM MEASUREMENTS PANEL -->
+            <Border Grid.Row="3"
                         Background="#2B2B2B"
                         BorderBrush="#555"
                         BorderThickness="1"
@@ -492,55 +593,31 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Actuators -->
+                    <!-- Process progress -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Actuators"
+                        <TextBlock Text="Process Progress"
                        Foreground="White"
                        FontSize="18"
                        FontWeight="Bold"
                        Margin="0,0,0,10"/>
 
-                        <TextBlock x:Name="HeaterTextBlock"
-                       Text="Heater: 0 %"
-                       Foreground="White"
-                       FontSize="16"/>
-
-                        <TextBlock x:Name="PumpTextBlock"
-                       Text="Vacuum Pump: 0 %"
-                       Foreground="White"
-                       FontSize="16"/>
-
-                        <TextBlock x:Name="VentValveTextBlock"
-                       Text="Vent Valve: 0 %"
-                       Foreground="White"
-                       FontSize="16"/>
-
-                        <TextBlock x:Name="FanTextBlock"
-                       Text="Fan: 0 %"
-                       Foreground="White"
-                       FontSize="16"/>
+                        <TextBlock x:Name="RemainingTimeTextBlock"
+                                   Text="Estimated Remaining: calculating..."
+                                   Foreground="White" FontSize="15"/>
+                        <TextBlock x:Name="SensorStatusTextBlock" Text="Sensors: OK"
+                                   Foreground="#00FF00" FontSize="15"/>
                     </StackPanel>
 
-                    <!-- Process Summary -->
+                    <!-- Batch performance: no duplicated live PV/SP values -->
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Process Summary"
+                        <TextBlock Text="Batch Performance"
                        Foreground="White"
                        FontSize="18"
                        FontWeight="Bold"
                        Margin="0,0,0,10"/>
-
-                        <TextBlock x:Name="TimeTextBlock"
-                       Text="Time: 0 s"
-                       Foreground="White"
-                       FontSize="15"/>
 
                         <TextBlock x:Name="MoistureRatioTextBlock"
                        Text="Moisture Ratio: 1.000"
-                       Foreground="White"
-                       FontSize="15"/>
-
-                        <TextBlock x:Name="RemainingTimeTextBlock"
-                       Text="Estimated Remaining: calculating..."
                        Foreground="White"
                        FontSize="15"/>
 
@@ -554,15 +631,16 @@
                        Foreground="White"
                        FontSize="15"/>
 
-                        <TextBlock x:Name="SensorStatusTextBlock"
-                       Text="Sensors: OK"
-                       Foreground="LightGreen"
+                        <TextBlock x:Name="EfficiencyTextBlock"
+                       Text="Efficiency: 0.000 kg/kWh"
+                       Foreground="White"
                        FontSize="15"/>
+
                     </StackPanel>
 
                     <!-- Alarms -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Alarms"
+                        <TextBlock Text="Active Alarm"
                        Foreground="White"
                        FontSize="18"
                        FontWeight="Bold"
@@ -570,7 +648,7 @@
 
                         <TextBlock x:Name="AlarmsTextBlock"
                        Text="No active alarms"
-                       Foreground="LightGreen"
+                       Foreground="#00FF00"
                        TextWrapping="Wrap"
                        FontSize="15"
                        Margin="0,0,0,10"/>
@@ -578,9 +656,9 @@
                 </Grid>
             </Border>
 
-                        </Grid>
-                        <!-- RIGHT SIDE PANEL -->
-                        <Border Grid.Column="2"
+        </Grid>
+        <!-- RIGHT SIDE PANEL -->
+        <Border Grid.Column="2"
                         Background="#252525"
                         BorderBrush="#555"
                         BorderThickness="1"
@@ -608,7 +686,7 @@
                     Content="DETAILS"
                     Height="42"
                     FontWeight="Bold"
-                    Background="#455A64"
+                    Background="#1976D2"
                     Foreground="White"
                     Margin="0,0,0,10"
                     Click="DetailsButton_Click"/>
@@ -617,7 +695,7 @@
                     Content="TRENDS"
                     Height="42"
                     FontWeight="Bold"
-                    Background="#1565C0"
+                    Background="#1976D2"
                     Foreground="White"
                     Margin="0,0,0,10"
                     Click="ShowTrendsButton_Click"/>
@@ -626,7 +704,7 @@
                     Content="ALARMS"
                     Height="42"
                     FontWeight="Bold"
-                    Background="#6A1B9A"
+                    Background="#1976D2"
                     Foreground="White"
                     Margin="0,0,0,10"
                     Click="ShowAlarmsButton_Click"/>
@@ -642,10 +720,30 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <TextBlock x:Name="ContextPanelTitleTextBlock"
-                                       Text="Actuator Control"
+                                       Text="Vacuum Chamber"
                                        Foreground="White"
                                        FontSize="16"
                                        FontWeight="Bold"
+                                       Margin="0,0,0,4"/>
+                            <TextBlock x:Name="SelectedObjectStatusTextBlock"
+                                       Text="State: Ready"
+                                       Foreground="#00FF00"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4"/>
+                            <StackPanel x:Name="ContextValuesPanel" Margin="0,0,0,10">
+                                <TextBlock x:Name="ContextValue1TextBlock" TextWrapping="Wrap" FontSize="12"/>
+                                <TextBlock x:Name="ContextValue2TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="ContextValue3TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="ContextValue4TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="ContextValue5TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="ContextValue6TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="ContextValue7TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <Separator Background="#555" Margin="0,0,0,10"/>
+                            <TextBlock Text="Actuator outputs"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
                                        Margin="0,0,0,4"/>
                             <TextBlock x:Name="ContextPanelModeTextBlock"
                                        Text="Auto mode: controller outputs"
@@ -654,36 +752,47 @@
                                        FontSize="12"
                                        Margin="0,0,0,12"/>
 
-                            <TextBlock Text="Heater Power [%]" Foreground="White"/>
-                            <TextBlock x:Name="ManualHeaterValueTextBlock"
-                                       Text="0 %" Foreground="LightGray"/>
-                            <Slider x:Name="ManualHeaterSlider"
-                                    Minimum="0" Maximum="100" Value="0"
-                                    ValueChanged="ManualSlider_ValueChanged"
-                                    Margin="0,0,0,10"/>
+                            <StackPanel x:Name="AutoOutputsPanel">
+                                <TextBlock Text="Heater Power" Foreground="White"/>
+                                <TextBlock x:Name="AutoHeaterValueTextBlock" Text="0 %"
+                                           Foreground="#E0E0E0" HorizontalAlignment="Right"/>
+                                <ProgressBar x:Name="AutoHeaterProgressBar" Minimum="0" Maximum="100"
+                                             Height="8" Margin="0,2,0,12"/>
+                                <TextBlock Text="Vacuum Pump" Foreground="White"/>
+                                <TextBlock x:Name="AutoPumpValueTextBlock" Text="0 %"
+                                           Foreground="#E0E0E0" HorizontalAlignment="Right"/>
+                                <ProgressBar x:Name="AutoPumpProgressBar" Minimum="0" Maximum="100"
+                                             Height="8" Margin="0,2,0,12"/>
+                                <TextBlock Text="Vent Valve" Foreground="White"/>
+                                <TextBlock x:Name="AutoVentValveValueTextBlock" Text="0 %"
+                                           Foreground="#E0E0E0" HorizontalAlignment="Right"/>
+                                <ProgressBar x:Name="AutoVentValveProgressBar" Minimum="0" Maximum="100"
+                                             Height="8" Margin="0,2,0,12"/>
+                                <TextBlock Text="Fan Speed" Foreground="White"/>
+                                <TextBlock x:Name="AutoFanValueTextBlock" Text="70 %"
+                                           Foreground="#E0E0E0" HorizontalAlignment="Right"/>
+                                <ProgressBar x:Name="AutoFanProgressBar" Minimum="0" Maximum="100"
+                                             Height="8" Margin="0,2,0,0"/>
+                            </StackPanel>
 
-                            <TextBlock Text="Vacuum Pump [%]" Foreground="White"/>
-                            <TextBlock x:Name="ManualPumpValueTextBlock"
-                                       Text="0 %" Foreground="LightGray"/>
-                            <Slider x:Name="ManualPumpSlider"
-                                    Minimum="0" Maximum="100" Value="0"
-                                    ValueChanged="ManualSlider_ValueChanged"
-                                    Margin="0,0,0,10"/>
-
-                            <TextBlock Text="Vent Valve [%]" Foreground="White"/>
-                            <TextBlock x:Name="ManualVentValveValueTextBlock"
-                                       Text="0 %" Foreground="LightGray"/>
-                            <Slider x:Name="ManualVentValveSlider"
-                                    Minimum="0" Maximum="100" Value="0"
-                                    ValueChanged="ManualSlider_ValueChanged"
-                                    Margin="0,0,0,10"/>
-
-                            <TextBlock Text="Fan Speed [%]" Foreground="White"/>
-                            <TextBlock x:Name="ManualFanValueTextBlock"
-                                       Text="70 %" Foreground="LightGray"/>
-                            <Slider x:Name="ManualFanSlider"
-                                    Minimum="0" Maximum="100" Value="70"
-                                    ValueChanged="ManualSlider_ValueChanged"/>
+                            <StackPanel x:Name="ManualControlsPanel" Visibility="Collapsed">
+                                <TextBlock Text="Heater Power [%]" Foreground="White"/>
+                                <TextBlock x:Name="ManualHeaterValueTextBlock" Text="0 %" Foreground="LightGray"/>
+                                <Slider x:Name="ManualHeaterSlider" Minimum="0" Maximum="100" Value="0"
+                                        ValueChanged="ManualSlider_ValueChanged" Margin="0,0,0,10"/>
+                                <TextBlock Text="Vacuum Pump [%]" Foreground="White"/>
+                                <TextBlock x:Name="ManualPumpValueTextBlock" Text="0 %" Foreground="LightGray"/>
+                                <Slider x:Name="ManualPumpSlider" Minimum="0" Maximum="100" Value="0"
+                                        ValueChanged="ManualSlider_ValueChanged" Margin="0,0,0,10"/>
+                                <TextBlock Text="Vent Valve [%]" Foreground="White"/>
+                                <TextBlock x:Name="ManualVentValveValueTextBlock" Text="0 %" Foreground="LightGray"/>
+                                <Slider x:Name="ManualVentValveSlider" Minimum="0" Maximum="100" Value="0"
+                                        ValueChanged="ManualSlider_ValueChanged" Margin="0,0,0,10"/>
+                                <TextBlock Text="Fan Speed [%]" Foreground="White"/>
+                                <TextBlock x:Name="ManualFanValueTextBlock" Text="70 %" Foreground="LightGray"/>
+                                <Slider x:Name="ManualFanSlider" Minimum="0" Maximum="100" Value="70"
+                                        ValueChanged="ManualSlider_ValueChanged"/>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </GroupBox>

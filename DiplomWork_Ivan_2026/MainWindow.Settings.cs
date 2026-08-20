@@ -42,12 +42,13 @@ namespace DiplomWork_Ivan_2026
 
             if (DryingRecipeInfoTextBlock != null)
             {
-                DryingRecipeInfoTextBlock.Text =
+                DryingRecipeInfoTextBlock.Text = Services.LocalizationService.Text(
                     $"Suggested simulation recipe for {material.Name}: " +
-                    $"{safeTemperatureSetpoint:F0} °C, " +
-                    $"{safePressureSetpoint:F0} kPa, " +
-                    $"fan {safeFanSpeed:F0}%. " +
-                    $"Material limit: {material.MaxTemperature:F0} °C.";
+                    $"{safeTemperatureSetpoint:F0} °C, {safePressureSetpoint:F0} kPa, " +
+                    $"fan {safeFanSpeed:F0}%. Material limit: {material.MaxTemperature:F0} °C.",
+                    $"Препоръчителна симулационна рецепта за {material}: " +
+                    $"{safeTemperatureSetpoint:F0} °C, {safePressureSetpoint:F0} kPa, " +
+                    $"вентилатор {safeFanSpeed:F0}%. Граница на материала: {material.MaxTemperature:F0} °C.");
             }
         }
 
@@ -78,40 +79,45 @@ namespace DiplomWork_Ivan_2026
         {
             if (!double.TryParse(TemperatureSetpointTextBox.Text, out double temperatureSetpoint))
             {
-                MessageBox.Show("Invalid temperature setpoint.");
+                MessageBox.Show(L("Invalid temperature setpoint.", "Невалидно задание за температура."));
                 return false;
             }
 
             if (!double.TryParse(PressureSetpointTextBox.Text, out double pressureSetpoint))
             {
-                MessageBox.Show("Invalid pressure setpoint.");
+                MessageBox.Show(L("Invalid pressure setpoint.", "Невалидно задание за налягане."));
                 return false;
             }
 
             if (pressureSetpoint <= 5.0 ||
                 pressureSetpoint > _settings.AmbientPressure)
             {
-                MessageBox.Show(
-                    $"Pressure setpoint must be above 5.0 kPa and not greater than {_settings.AmbientPressure:F1} kPa.");
+                MessageBox.Show(L(
+                    $"Pressure setpoint must be above 5.0 kPa and not greater than {_settings.AmbientPressure:F1} kPa.",
+                    $"Заданието за налягане трябва да е над 5.0 kPa и не по-голямо от {_settings.AmbientPressure:F1} kPa."));
                 return false;
             }
 
             if (temperatureSetpoint <= _settings.AmbientTemperature ||
                 temperatureSetpoint > 200.0)
             {
-                MessageBox.Show(
-                    $"Temperature setpoint must be above {_settings.AmbientTemperature:F1} °C and not greater than 200 °C.");
+                MessageBox.Show(L(
+                    $"Temperature setpoint must be above {_settings.AmbientTemperature:F1} °C and not greater than 200 °C.",
+                    $"Заданието за температура трябва да е над {_settings.AmbientTemperature:F1} °C и не по-голямо от 200 °C."));
                 return false;
             }
 
             if (MaterialComboBox.SelectedItem is DryingMaterial material &&
                 temperatureSetpoint > material.MaxTemperature)
             {
-                MessageBox.Show(
+                MessageBox.Show(L(
                     $"Temperature setpoint {temperatureSetpoint:F1} °C exceeds " +
                     $"the safe limit for {material.Name}: " +
                     $"{material.MaxTemperature:F1} °C. " +
-                    "Select a recommended drying mode or reduce the setpoint.");
+                    "Select a recommended drying mode or reduce the setpoint.",
+                    $"Заданието за температура {temperatureSetpoint:F1} °C надвишава " +
+                    $"безопасната граница за {material}: {material.MaxTemperature:F1} °C. " +
+                    "Изберете препоръчителен режим или намалете заданието."));
                 return false;
             }
 

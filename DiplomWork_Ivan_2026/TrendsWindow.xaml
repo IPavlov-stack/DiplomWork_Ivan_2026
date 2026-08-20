@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Vacuum Dryer Process Trends"
+            <TextBlock x:Name="WindowTitleTextBlock" Text="Vacuum Dryer Process Trends"
                        Foreground="White"
                        FontSize="28"
                        FontWeight="Bold"

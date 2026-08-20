@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026.Trends
 {
     public static class TrendChartDataBuilder
     {
         public const int MaxRenderedPoints = 1_200;
+        private static string L(string en, string bg) => LocalizationService.Text(en, bg);
 
         public static TrendChartData Build(
             IReadOnlyList<TrendPoint> allPoints,
@@ -35,140 +37,140 @@ namespace DiplomWork_Ivan_2026.Trends
             switch (selectedTrendIndex)
             {
                 case 0:
-                    data.Title = "Temperature [°C]";
+                    data.Title = L("Temperature [°C]", "Температура [°C]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Chamber Temperature",
+                        Name = L("Chamber Temperature", "Температура в камерата"),
                         Values = points.Select(p => p.Temperature).ToList(),
                         Brush = Brushes.OrangeRed
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Material Temperature",
+                        Name = L("Material Temperature", "Температура на материала"),
                         Values = points.Select(p => p.MaterialTemperature).ToList(),
                         Brush = Brushes.Gold
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Temperature Setpoint",
+                        Name = L("Temperature Setpoint", "Задание за температура"),
                         Values = points.Select(p => p.TemperatureSetpoint).ToList(),
                         Brush = Brushes.DeepSkyBlue
                     });
                     data.CurrentText =
-                        $"Chamber: {last.Temperature:F1} °C   " +
-                        $"Material: {last.MaterialTemperature:F1} °C   " +
-                        $"Setpoint: {last.TemperatureSetpoint:F1} °C";
+                        $"{L("Chamber", "Камера")}: {last.Temperature:F1} °C   " +
+                        $"{L("Material", "Материал")}: {last.MaterialTemperature:F1} °C   " +
+                        $"{L("Setpoint", "Задание")}: {last.TemperatureSetpoint:F1} °C";
                     break;
 
                 case 1:
-                    data.Title = "Pressure [kPa]";
+                    data.Title = L("Pressure [kPa]", "Налягане [kPa]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Pressure",
+                        Name = L("Pressure", "Налягане"),
                         Values = points.Select(p => p.Pressure).ToList(),
                         Brush = Brushes.DeepSkyBlue
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Pressure Setpoint",
+                        Name = L("Pressure Setpoint", "Задание за налягане"),
                         Values = points.Select(p => p.PressureSetpoint).ToList(),
                         Brush = Brushes.Gold
                     });
                     data.CurrentText =
-                        $"Pressure: {last.Pressure:F1} kPa   " +
-                        $"Setpoint: {last.PressureSetpoint:F1} kPa";
+                        $"{L("Pressure", "Налягане")}: {last.Pressure:F1} kPa   " +
+                        $"{L("Setpoint", "Задание")}: {last.PressureSetpoint:F1} kPa";
                     break;
 
                 case 2:
-                    data.Title = "Moisture (wet basis) / Humidity [%]";
+                    data.Title = L("Moisture (wet basis) / Humidity [%]", "Влага (мокра база) / Влажност [%]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Material Moisture",
+                        Name = L("Material Moisture", "Влага на материала"),
                         Values = points.Select(p => p.MaterialMoisture).ToList(),
                         Brush = Brushes.LimeGreen
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Dynamic Equilibrium Moisture",
+                        Name = L("Dynamic Equilibrium Moisture", "Динамична равновесна влага"),
                         Values = points.Select(p => p.EquilibriumMoisture).ToList(),
                         Brush = Brushes.Gold
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Chamber Relative Humidity",
+                        Name = L("Chamber Relative Humidity", "Относителна влажност в камерата"),
                         Values = points.Select(p => p.AirHumidity).ToList(),
                         Brush = Brushes.DeepSkyBlue
                     });
                     data.CurrentText =
-                        $"Material Moisture: {last.MaterialMoisture:F1} % wb   " +
-                        $"Equilibrium: {last.EquilibriumMoisture:F1} % wb   " +
-                        $"RH: {last.AirHumidity:F1} %";
+                        $"{L("Material Moisture", "Влага на материала")}: {last.MaterialMoisture:F1} % wb   " +
+                        $"{L("Equilibrium", "Равновесна")}: {last.EquilibriumMoisture:F1} % wb   " +
+                        $"{L("RH", "ОВ")}: {last.AirHumidity:F1} %";
                     break;
 
                 case 3:
-                    data.Title = "Drying Rate [% wb/min]";
+                    data.Title = L("Drying Rate [% wb/min]", "Скорост на сушене [% wb/min]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Drying Rate",
+                        Name = L("Drying Rate", "Скорост на сушене"),
                         Values = points.Select(p => p.DryingRate).ToList(),
                         Brush = Brushes.Gold
                     });
-                    data.CurrentText = $"Drying Rate: {last.DryingRate:F3} % wb/min";
+                    data.CurrentText = $"{L("Drying Rate", "Скорост на сушене")}: {last.DryingRate:F3} % wb/min";
                     break;
 
                 case 4:
-                    data.Title = "Actuators [%]";
+                    data.Title = L("Actuators [%]", "Изпълнителни механизми [%]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Heater Power",
+                        Name = L("Heater Power", "Мощност на нагревателя"),
                         Values = points.Select(p => p.HeaterPower).ToList(),
                         Brush = Brushes.OrangeRed
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Pump Power",
+                        Name = L("Pump Power", "Мощност на помпата"),
                         Values = points.Select(p => p.PumpPower).ToList(),
                         Brush = Brushes.DeepSkyBlue
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Vent Valve",
+                        Name = L("Vent Valve", "Вентилационен клапан"),
                         Values = points.Select(p => p.VentValveOpening).ToList(),
                         Brush = Brushes.Gold
                     });
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Fan Speed",
+                        Name = L("Fan Speed", "Скорост на вентилатора"),
                         Values = points.Select(p => p.FanSpeed).ToList(),
                         Brush = Brushes.LimeGreen
                     });
                     data.CurrentText =
-                        $"Heater: {last.HeaterPower:F0} %   " +
-                        $"Pump: {last.PumpPower:F0} %   " +
-                        $"Vent: {last.VentValveOpening:F0} %   " +
-                        $"Fan: {last.FanSpeed:F0} %";
+                        $"{L("Heater", "Нагревател")}: {last.HeaterPower:F0} %   " +
+                        $"{L("Pump", "Помпа")}: {last.PumpPower:F0} %   " +
+                        $"{L("Vent", "Клапан")}: {last.VentValveOpening:F0} %   " +
+                        $"{L("Fan", "Вентилатор")}: {last.FanSpeed:F0} %";
                     break;
 
                 case 5:
-                    data.Title = "Energy";
+                    data.Title = L("Energy", "Енергия");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Total Energy",
+                        Name = L("Total Energy", "Обща енергия"),
                         Values = points.Select(p => p.TotalEnergyKWh).ToList(),
                         Brush = Brushes.MediumPurple
                     });
-                    data.CurrentText = $"Total Energy: {last.TotalEnergyKWh:F3} kWh";
+                    data.CurrentText = $"{L("Total Energy", "Обща енергия")}: {last.TotalEnergyKWh:F3} kWh";
                     break;
 
                 default:
-                    data.Title = "Temperature [°C]";
+                    data.Title = L("Temperature [°C]", "Температура [°C]");
                     data.Series.Add(new ChartSeries
                     {
-                        Name = "Chamber Temperature",
+                        Name = L("Chamber Temperature", "Температура в камерата"),
                         Values = points.Select(p => p.Temperature).ToList(),
                         Brush = Brushes.OrangeRed
                     });
-                    data.CurrentText = $"Chamber: {last.Temperature:F1} °C";
+                    data.CurrentText = $"{L("Chamber", "Камера")}: {last.Temperature:F1} °C";
                     break;
             }
 

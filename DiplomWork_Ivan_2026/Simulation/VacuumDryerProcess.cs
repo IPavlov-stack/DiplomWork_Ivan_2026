@@ -19,12 +19,9 @@ namespace DiplomWork_Ivan_2026.Simulation
         public VentValve VentValve { get; } = new VentValve();
         public Fan Fan { get; } = new Fan();
         public VacuumDryerModelParameters Parameters { get; }
-        public VirtualAnalogSensor ChamberTemperatureSensor { get; } =
-            new VirtualAnalogSensor(3.0, 0.05, 0.1, -50.0, 250.0, 101);
-        public VirtualAnalogSensor MaterialTemperatureSensor { get; } =
-            new VirtualAnalogSensor(5.0, 0.03, 0.1, -50.0, 250.0, 202);
-        public VirtualAnalogSensor PressureSensor { get; } =
-            new VirtualAnalogSensor(1.0, 0.03, 0.1, 0.0, 120.0, 303);
+        public VirtualAnalogSensor ChamberTemperatureSensor { get; } = new VirtualAnalogSensor(3.0, 0.05, 0.1, -50.0, 250.0, 101);
+        public VirtualAnalogSensor MaterialTemperatureSensor { get; } = new VirtualAnalogSensor(5.0, 0.03, 0.1, -50.0, 250.0, 202);
+        public VirtualAnalogSensor PressureSensor { get; } = new VirtualAnalogSensor(1.0, 0.03, 0.1, 0.0, 120.0, 303);
         public DryingMaterial? SelectedMaterial { get; private set; }
 
         public VacuumDryerProcess(VacuumDryerModelParameters? parameters = null)
@@ -41,15 +38,12 @@ namespace DiplomWork_Ivan_2026.Simulation
         {
             SelectedMaterial = material;
 
-            double initialVaporPressure =
-                SaturationVaporPressureKPa(20.0) *
-                Math.Clamp(
+            double initialVaporPressure = SaturationVaporPressureKPa(20.0) *
+                    Math.Clamp(
                     Parameters.ReferenceRelativeHumidityPercent / 100.0,
                     0.0,
                     1.0);
-            double initialVaporMass = VaporMassFromPartialPressure(
-                initialVaporPressure,
-                20.0);
+            double initialVaporMass = VaporMassFromPartialPressure( initialVaporPressure,20.0);
 
             State = new VacuumDryerState
             {
@@ -123,7 +117,7 @@ namespace DiplomWork_Ivan_2026.Simulation
             DryingMaterial material)
         {
             // All derivatives are evaluated from the same state and then applied
-            // together with one explicit Euler step.
+            // together with one explicit euler step.
             double chamberTemperature = State.Temperature;
             double materialTemperature = State.MaterialTemperature;
             double pressure = State.Pressure;
@@ -273,8 +267,8 @@ namespace DiplomWork_Ivan_2026.Simulation
                 0.0,
                 moistureDryBasis - dynamicEquilibriumMoistureDryBasis);
 
-            // The vapour-pressure deficit closes the mass-transfer model:
-            // evaporation tends to zero as chamber vapour approaches the
+            //  The vapor pressure deficitt closes the mass-transfer model:
+            // evaporation tends to zero as chamber vapor approaches the
             // saturation pressure at the material surface temperature.
             double surfaceSaturationPressureKPa =
                 SaturationVaporPressureKPa(materialTemperatureC);
@@ -284,9 +278,7 @@ namespace DiplomWork_Ivan_2026.Simulation
                 0.0,
                 1.0);
 
-            return effectiveDryingCoefficient *
-                moistureDrivingForce *
-                vaporPressureDrivingForce;
+            return effectiveDryingCoefficient * moistureDrivingForce * vaporPressureDrivingForce;
         }
 
         private double CalculatePressureInfluence(
@@ -319,9 +311,7 @@ namespace DiplomWork_Ivan_2026.Simulation
 
             // A well-mixed chamber is assumed, so the pump removes the same
             // vapour fraction as is present in the chamber gas.
-            double pumpRemovalRateKgPerSecond =
-                pumpInput / Parameters.VacuumTimeConstantSeconds *
-                currentVaporMassKg;
+            double pumpRemovalRateKgPerSecond = pumpInput / Parameters.VacuumTimeConstantSeconds * currentVaporMassKg;
 
             // Leakage and an open vent admit ambient gas while chamber pressure
             // is below ambient. The incoming vapour follows ambient absolute

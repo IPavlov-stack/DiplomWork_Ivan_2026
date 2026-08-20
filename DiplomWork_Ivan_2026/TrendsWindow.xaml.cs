@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Trends;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -29,7 +30,21 @@ namespace DiplomWork_Ivan_2026
             _refreshTimer.Tick += RefreshTimer_Tick;
             _refreshTimer.Start();
 
+            LocalizationService.LanguageChanged += LocalizationService_LanguageChanged;
+            ApplyLocalization();
+
             DrawSelectedTrend();
+        }
+
+        private void LocalizationService_LanguageChanged(object? sender, EventArgs e)
+        {
+            ApplyLocalization();
+            DrawSelectedTrend();
+        }
+
+        private void ApplyLocalization()
+        {
+            LocalizationService.ApplyStaticText(this);
         }
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -60,8 +75,8 @@ namespace DiplomWork_Ivan_2026
             if (_trendBuffer.Points.Count == 0)
             {
                 MainTrendCanvas.Children.Clear();
-                CurrentValueTextBlock.Text = "Current: 0.0";
-                ChartTitleTextBlock.Text = "No data";
+                CurrentValueTextBlock.Text = LocalizationService.Text("Current: 0.0", "Текуща: 0.0");
+                ChartTitleTextBlock.Text = LocalizationService.Text("No data", "Няма данни");
                 _currentXValues.Clear();
                 _currentSeries.Clear();
                 _renderState = null;
@@ -211,7 +226,7 @@ namespace DiplomWork_Ivan_2026
 
             TextBlock timeText = new TextBlock
             {
-                Text = $"Elapsed: {TrendTimeFormatter.FormatCursor(timeValue)}",
+                Text = $"{LocalizationService.Text("Elapsed", "Изминало време")}: {TrendTimeFormatter.FormatCursor(timeValue)}",
                 Foreground = Brushes.White,
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
@@ -316,6 +331,7 @@ namespace DiplomWork_Ivan_2026
         protected override void OnClosed(EventArgs e)
         {
             _refreshTimer.Stop();
+            LocalizationService.LanguageChanged -= LocalizationService_LanguageChanged;
             base.OnClosed(e);
         }
 

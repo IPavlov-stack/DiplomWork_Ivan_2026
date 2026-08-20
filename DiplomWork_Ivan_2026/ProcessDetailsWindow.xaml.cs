@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Models;
 using DiplomWork_Ivan_2026.Simulation;
+using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -21,8 +23,21 @@ namespace DiplomWork_Ivan_2026
             _refreshTimer.Tick += RefreshTimer_Tick;
             _refreshTimer.Start();
 
+            LocalizationService.LanguageChanged += LocalizationService_LanguageChanged;
+            ApplyLocalization();
+
             UpdateDetails();
         }
+
+        private static string L(string en, string bg) => LocalizationService.Text(en, bg);
+
+        private void LocalizationService_LanguageChanged(object? sender, EventArgs e)
+        {
+            ApplyLocalization();
+            UpdateDetails();
+        }
+
+        private void ApplyLocalization() => LocalizationService.ApplyStaticText(this);
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
@@ -35,115 +50,133 @@ namespace DiplomWork_Ivan_2026
             var material = _process.SelectedMaterial;
 
             ChamberTemperatureTextBlock.Text =
-                $"Chamber Temperature: {state.MeasuredTemperature:F1} °C";
+                $"{L("Chamber Temperature", "Температура в камерата")}: {state.MeasuredTemperature:F1} °C";
 
             MaterialTemperatureTextBlock.Text =
-                $"Material Temperature: {state.MeasuredMaterialTemperature:F1} °C";
+                $"{L("Material Temperature", "Температура на материала")}: {state.MeasuredMaterialTemperature:F1} °C";
+
+            TemperatureSetpointTextBlock.Text =
+                $"{L("Temperature Setpoint", "Задание за температура")}: {state.ActiveTemperatureSetpoint:F1} °C";
 
             PressureTextBlock.Text =
-                $"Pressure: {state.MeasuredPressure:F1} kPa";
+                $"{L("Pressure", "Налягане")}: {state.MeasuredPressure:F1} kPa";
+
+            PressureSetpointTextBlock.Text =
+                $"{L("Pressure Setpoint", "Задание за налягане")}: {state.ActivePressureSetpoint:F1} kPa";
 
             VacuumLevelTextBlock.Text =
-                $"Vacuum Level: {state.VacuumLevel:F1} %";
+                $"{L("Vacuum Level", "Ниво на вакуум")}: {state.VacuumLevel:F1} %";
 
             AirHumidityTextBlock.Text =
-                $"Relative Humidity: {state.AirHumidity:F1} %";
+                $"{L("Relative Humidity", "Относителна влажност")}: {state.AirHumidity:F1} %";
 
             VaporPressureTextBlock.Text =
-                $"Water Vapor Partial Pressure: {state.WaterVaporPartialPressureKPa:F2} kPa";
+                $"{L("Water Vapor Partial Pressure", "Парциално налягане на водните пари")}: {state.WaterVaporPartialPressureKPa:F2} kPa";
 
             MaterialMoistureTextBlock.Text =
-                $"Material Moisture: {state.MaterialMoistureWetBasisPercent:F1} % wb " +
+                $"{L("Material Moisture", "Влага на материала")}: {state.MaterialMoistureWetBasisPercent:F1} % wb " +
                 $"(X = {state.MaterialMoistureDryBasis:F3} kg/kg db)";
 
             EquilibriumMoistureTextBlock.Text =
-                $"Dynamic Equilibrium Moisture: " +
+                $"{L("Dynamic Equilibrium Moisture", "Динамична равновесна влага")}: " +
                 $"{DryingMaterial.DryBasisToWetBasisPercent(state.DynamicEquilibriumMoistureDryBasis):F1} % wb";
 
             MoistureRatioTextBlock.Text =
-                $"Moisture Ratio: {state.MoistureRatio:F3}";
+                $"{L("Moisture Ratio", "Отношение на влагата")}: {state.MoistureRatio:F3}";
 
             DryingRateTextBlock.Text =
-                $"Drying Rate: {state.DryingRateWetBasisPercentPerMinute:F3} % wb/min";
+                $"{L("Drying Rate", "Скорост на сушене")}: {state.DryingRateWetBasisPercentPerMinute:F3} % wb/min";
 
             AirFlowRateTextBlock.Text =
-                $"Air Flow Rate: {state.AirFlowRate:F1} m³/h";
+                $"{L("Air Flow Rate", "Въздушен дебит")}: {state.AirFlowRate:F1} m³/h";
 
             TotalEnergyTextBlock.Text =
-                $"Total Energy: {state.TotalEnergyKWh:F3} kWh";
+                $"{L("Total Energy", "Обща енергия")}: {state.TotalEnergyKWh:F3} kWh";
 
             EvaporatedWaterTextBlock.Text =
-                $"Evaporated Water: {state.EvaporatedWaterKg:F2} kg";
+                $"{L("Evaporated Water", "Изпарена вода")}: {state.EvaporatedWaterKg:F2} kg";
 
             PumpedVaporTextBlock.Text =
-                $"Pumped Water Vapor: {state.PumpedWaterVaporKg:F2} kg";
+                $"{L("Pumped Water Vapor", "Отведени водни пари")}: {state.PumpedWaterVaporKg:F2} kg";
 
             CondensedWaterTextBlock.Text =
-                $"Condensed Water: {state.CondensedWaterKg:F2} kg";
+                $"{L("Condensed Water", "Кондензирана вода")}: {state.CondensedWaterKg:F2} kg";
 
             VaporBalanceTextBlock.Text =
-                $"Water Vapor Balance Residual: " +
+                $"{L("Water Vapor Balance Residual", "Остатък от баланса на водните пари")}: " +
                 $"{state.WaterVaporMassBalanceResidualKg:F4} kg";
 
             EfficiencyTextBlock.Text =
-                $"Efficiency: {state.EfficiencyKgPerKWh:F2} kg/kWh";
+                $"{L("Efficiency", "Ефективност")}: {state.EfficiencyKgPerKWh:F2} kg/kWh";
 
             ElapsedTimeTextBlock.Text =
-                $"Elapsed Time: {state.ElapsedTime:F0} s";
+                $"{L("Elapsed Time", "Изминало време")}: {state.ElapsedTime:F0} s";
 
             RemainingTimeTextBlock.Text =
-                $"Estimated Remaining Time: {FormatRemainingTime(state.EstimatedRemainingTimeSeconds)}";
+                $"{L("Estimated Remaining Time", "Оставащо време")}: {FormatRemainingTime(state.EstimatedRemainingTimeSeconds)}";
 
             HeaterPowerTextBlock.Text =
-                $"Heater Power: {state.HeaterPower:F0} %";
+                $"{L("Heater Power", "Мощност на нагревателя")}: {state.HeaterPower:F0} %";
 
             PumpPowerTextBlock.Text =
-                $"Vacuum Pump Power: {state.VacuumPumpPower:F0} %";
+                $"{L("Vacuum Pump Power", "Мощност на вакуумната помпа")}: {state.VacuumPumpPower:F0} %";
 
             VentValveTextBlock.Text =
-                $"Vent Valve Opening: {state.VentValveOpening:F0} %";
+                $"{L("Vent Valve Opening", "Отваряне на вентилационния клапан")}: {state.VentValveOpening:F0} %";
 
             FanSpeedTextBlock.Text =
-                $"Fan Speed: {state.FanSpeed:F0} %";
+                $"{L("Fan Speed", "Скорост на вентилатора")}: {state.FanSpeed:F0} %";
 
             ProcessStageTextBlock.Text =
-                $"Process Stage: {state.ProcessStage}";
+                $"{L("Process Stage", "Етап на процеса")}: {LocalizeStage(state.ProcessStage)}";
 
             SensorStatusTextBlock.Text =
-                _process.HasSensorFault ? "Sensors: FAULT" : "Sensors: OK";
+                _process.HasSensorFault
+                    ? L("Sensors: FAULT", "Датчици: ПОВРЕДА")
+                    : L("Sensors: OK", "Датчици: OK");
+            SensorStatusTextBlock.Foreground = _process.HasSensorFault
+                ? Brushes.Red
+                : Brushes.Lime;
 
             ProcessStatusTextBlock.Text =
-                state.IsCompleted ? "Process Status: Completed" : "Process Status: Active / Stopped";
+                state.SafetyInterlockActive
+                    ? L("Process Status: Safety trip", "Статус на процеса: Задействана защита")
+                    : state.IsCompleted
+                        ? L("Process Status: Completed", "Статус на процеса: Завършен")
+                        : L("Process Status: Available", "Статус на процеса: Готов");
+            ProcessStatusTextBlock.Foreground = state.SafetyInterlockActive
+                ? Brushes.Red
+                : state.IsCompleted ? Brushes.DeepSkyBlue : Brushes.Lime;
 
             if (material != null)
             {
                 MaterialNameTextBlock.Text =
-                    $"Material: {material.Name}";
+                    $"{L("Material", "Материал")}: {material}";
 
                 InitialMoistureTextBlock.Text =
-                    $"Initial Moisture: {material.InitialMoistureWetBasisPercent:F1} % wb";
+                    $"{L("Initial Moisture", "Начална влага")}: {material.InitialMoistureWetBasisPercent:F1} % wb";
 
                 TargetMoistureTextBlock.Text =
-                    $"Target Moisture: {material.TargetMoistureWetBasisPercent:F1} % wb";
+                    $"{L("Target Moisture", "Целева влага")}: {material.TargetMoistureWetBasisPercent:F1} % wb";
 
                 MaxTemperatureTextBlock.Text =
-                    $"Max Temperature: {material.MaxTemperature:F1} °C";
+                    $"{L("Max Temperature", "Максимална температура")}: {material.MaxTemperature:F1} °C";
 
                 DryingCoefficientTextBlock.Text =
-                    $"Drying Coefficient: {material.DryingCoefficient:F2}";
+                    $"{L("Drying Coefficient", "Коефициент на сушене")}: {material.DryingCoefficient:F2}";
 
                 MaterialMassTextBlock.Text =
-                    $"Initial Wet Mass: {material.InitialWetMassKg:F1} kg " +
-                    $"(Dry Mass: {material.DryMassKg:F2} kg)";
+                    $"{L("Initial Wet Mass", "Начална мокра маса")}: {material.InitialWetMassKg:F1} kg " +
+                    $"({L("Dry Mass", "Суха маса")}: {material.DryMassKg:F2} kg)";
             }
             else
             {
-                MaterialNameTextBlock.Text = "Material: -";
-                InitialMoistureTextBlock.Text = "Initial Moisture: -";
-                TargetMoistureTextBlock.Text = "Target Moisture: -";
-                MaxTemperatureTextBlock.Text = "Max Temperature: -";
-                DryingCoefficientTextBlock.Text = "Drying Coefficient: -";
-                MaterialMassTextBlock.Text = "Material Mass: -";
+                MaterialNameTextBlock.Text = L("Material: -", "Материал: -");
+                InitialMoistureTextBlock.Text = L("Initial Moisture: -", "Начална влага: -");
+                TargetMoistureTextBlock.Text = L("Target Moisture: -", "Целева влага: -");
+                MaxTemperatureTextBlock.Text = L("Max Temperature: -", "Максимална температура: -");
+                DryingCoefficientTextBlock.Text = L("Drying Coefficient: -", "Коефициент на сушене: -");
+                MaterialMassTextBlock.Text = L("Material Mass: -", "Маса на материала: -");
             }
         }
 
@@ -155,14 +188,29 @@ namespace DiplomWork_Ivan_2026
         private static string FormatRemainingTime(double? seconds)
         {
             if (!seconds.HasValue)
-                return "calculating...";
+                return L("calculating...", "изчислява се...");
 
             TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(0.0, seconds.Value));
             if (remaining.TotalDays >= 1.0)
-                return $"{(int)remaining.TotalDays}d {remaining.Hours:D2}h";
+                return LocalizationService.IsBulgarian
+                    ? $"{(int)remaining.TotalDays}д {remaining.Hours:D2}ч"
+                    : $"{(int)remaining.TotalDays}d {remaining.Hours:D2}h";
 
             return $"{(int)remaining.TotalHours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
         }
+
+        private static string LocalizeStage(Enums.ProcessStage stage) => stage switch
+        {
+            Enums.ProcessStage.Preheating => L("Preheating", "Предварително нагряване"),
+            Enums.ProcessStage.Evacuation => L("Evacuation", "Вакуумиране"),
+            Enums.ProcessStage.Drying => L("Drying", "Сушене"),
+            Enums.ProcessStage.FinalDrying => L("Final drying", "Финално сушене"),
+            Enums.ProcessStage.Venting => L("Pressure recovery", "Възстановяване на налягането"),
+            Enums.ProcessStage.Manual => L("Manual control", "Ръчно управление"),
+            Enums.ProcessStage.SafetyShutdown => L("Safety shutdown", "Аварийно изключване"),
+            Enums.ProcessStage.Completed => L("Completed", "Завършен"),
+            _ => L("Idle", "Готовност")
+        };
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -175,6 +223,7 @@ namespace DiplomWork_Ivan_2026
         protected override void OnClosed(EventArgs e)
         {
             _refreshTimer.Stop();
+            LocalizationService.LanguageChanged -= LocalizationService_LanguageChanged;
             base.OnClosed(e);
         }
 
