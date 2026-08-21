@@ -44,6 +44,7 @@ namespace DiplomWork_Ivan_2026.Services
                 ["Simulation speed:"] = "Скорост на симулацията:",
                 ["VACUUM"] = "ВАКУУМНА",
                 ["DRYER"] = "СУШИЛНЯ",
+                ["VACUUM DRYER"] = "ВАКУУМНА СУШИЛНЯ",
                 ["CHAMBER"] = "КАМЕРА",
                 ["HEATER"] = "НАГРЕВАТЕЛ",
                 ["FAN"] = "ВЕНТ.",
