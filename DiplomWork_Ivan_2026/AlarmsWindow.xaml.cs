@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Linq;
+using System.Windows.Media;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Services;
 using DiplomWork_Ivan_2026.Enums;
@@ -72,7 +73,9 @@ namespace DiplomWork_Ivan_2026
                     Status = a.IsActive
                         ? LocalizationService.Text("ACTIVE", "АКТИВНА")
                         : LocalizationService.Text("CLEARED", "ИЗЧИСТЕНА"),
+                    StatusForeground = a.IsActive ? Brushes.OrangeRed : Brushes.LimeGreen,
                     Priority = LocalizeSeverity(a.Severity),
+                    PriorityForeground = GetSeverityBrush(a.Severity),
                     Date = a.Time.ToString("dd.MM.yyyy"),
                     Time = a.Time.ToString("HH:mm:ss"),
                     Type = LocalizeAlarmType(a.Type),
@@ -97,6 +100,13 @@ namespace DiplomWork_Ivan_2026
             _ => LocalizationService.Text("Info", "Информация")
         };
 
+        private static Brush GetSeverityBrush(AlarmSeverity severity) => severity switch
+        {
+            AlarmSeverity.Critical => Brushes.OrangeRed,
+            AlarmSeverity.Warning => Brushes.Gold,
+            _ => Brushes.DeepSkyBlue
+        };
+
         private static string LocalizeAlarmType(AlarmType type) => type switch
         {
             AlarmType.HighTemperature => LocalizationService.Text("High Temperature", "Висока температура"),
@@ -114,7 +124,9 @@ namespace DiplomWork_Ivan_2026
         private class AlarmRow
         {
             public string Status { get; set; } = "";
+            public Brush StatusForeground { get; set; } = Brushes.White;
             public string Priority { get; set; } = "";
+            public Brush PriorityForeground { get; set; } = Brushes.White;
             public string Date { get; set; } = "";
             public string Time { get; set; } = "";
             public string Type { get; set; } = "";

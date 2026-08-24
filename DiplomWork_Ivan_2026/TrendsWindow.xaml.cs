@@ -124,7 +124,7 @@ namespace DiplomWork_Ivan_2026
             string? tag = selectedItem.Tag?.ToString();
 
             if (string.Equals(tag, "All", StringComparison.OrdinalIgnoreCase))
-                return null;
+                return TrendBuffer.HistoryDurationSeconds;
 
             return double.TryParse(tag, out double seconds) && seconds > 0.0
                 ? seconds

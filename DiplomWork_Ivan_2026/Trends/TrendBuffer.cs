@@ -4,11 +4,15 @@ namespace DiplomWork_Ivan_2026.Trends
 {
     public class TrendBuffer
     {
+        public const int HistoryDurationHours = 24;
+        public const double HistoryDurationSeconds = HistoryDurationHours * 60.0 * 60.0;
+        public const int DefaultMaxPoints = (int)HistoryDurationSeconds + 1;
+
         private readonly TrendPointRingBuffer _points;
 
         public IReadOnlyList<TrendPoint> Points => _points;
 
-        public TrendBuffer(int maxPoints = 50_000)
+        public TrendBuffer(int maxPoints = DefaultMaxPoints)
         {
             _points = new TrendPointRingBuffer(maxPoints);
         }

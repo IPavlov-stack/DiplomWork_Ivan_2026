@@ -89,6 +89,7 @@
                   AlternatingRowBackground="#333333"
                   BorderBrush="#555"
                   BorderThickness="1"
+                  MinRowHeight="34"
                   FontSize="14"
                   Margin="0,10,0,10">
 
@@ -105,13 +106,29 @@
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
 
-                <DataGridTextColumn Header="Status"
-                                    Binding="{Binding Status}"
-                                    Width="100"/>
+                <DataGridTemplateColumn Header="Status" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Status}"
+                                       Foreground="{Binding StatusForeground}"
+                                       FontWeight="SemiBold"
+                                       Margin="6,4"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Priority"
-                                    Binding="{Binding Priority}"
-                                    Width="110"/>
+                <DataGridTemplateColumn Header="Priority" Width="110">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Priority}"
+                                       Foreground="{Binding PriorityForeground}"
+                                       FontWeight="SemiBold"
+                                       Margin="6,4"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="Date"
                                     Binding="{Binding Date}"
@@ -121,17 +138,38 @@
                                     Binding="{Binding Time}"
                                     Width="110"/>
 
-                <DataGridTextColumn Header="Type"
-                                    Binding="{Binding Type}"
-                                    Width="190"/>
+                <DataGridTemplateColumn Header="Type" Width="190">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Type}"
+                                       TextWrapping="Wrap"
+                                       Margin="6,4"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Description"
-                                    Binding="{Binding Description}"
-                                    Width="2*"/>
+                <DataGridTemplateColumn Header="Description" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Description}"
+                                       TextWrapping="Wrap"
+                                       Margin="6,4"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Recommended action"
-                                    Binding="{Binding RecommendedAction}"
-                                    Width="2*"/>
+                <DataGridTemplateColumn Header="Recommended action" Width="2*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding RecommendedAction}"
+                                       TextWrapping="Wrap"
+                                       Margin="6,4"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
             </DataGrid.Columns>
         </DataGrid>

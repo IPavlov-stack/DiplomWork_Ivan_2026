@@ -20,7 +20,7 @@ namespace DiplomWork_Ivan_2026
         private readonly Models.ProcessSettings _settings = new Models.ProcessSettings();
         private readonly AlarmService _alarmService = new AlarmService();
         private readonly SafetyInterlockService _safetyInterlockService = new SafetyInterlockService();
-        private readonly TrendBuffer _trendBuffer = new TrendBuffer(50_000);
+        private readonly TrendBuffer _trendBuffer = new TrendBuffer();
 
         private readonly OnOffTemperatureController _temperatureController = new OnOffTemperatureController();
         private readonly PiPressureController _pressureController = new PiPressureController();
