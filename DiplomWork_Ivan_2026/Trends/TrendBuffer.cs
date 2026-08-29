@@ -11,19 +11,31 @@ namespace DiplomWork_Ivan_2026.Trends
         private readonly TrendPointRingBuffer _points;
 
         public IReadOnlyList<TrendPoint> Points => _points;
+        public ExperimentMetadata? Metadata { get; private set; }
 
         public TrendBuffer(int maxPoints = DefaultMaxPoints)
         {
             _points = new TrendPointRingBuffer(maxPoints);
         }
 
-        public void AddPoint(VacuumDryerState state, ProcessSettings settings)
+        public void BeginExperiment(ExperimentMetadata metadata)
+        {
+            ArgumentNullException.ThrowIfNull(metadata);
+            _points.Clear();
+            Metadata = metadata;
+        }
+
+        public void AddPoint(
+            VacuumDryerState state,
+            ProcessSettings settings,
+            int simulationSpeedMultiplier)
         {
             _points.Add(new TrendPoint
             {
                 Time = state.ElapsedTime,
                 ProcessStage = state.ProcessStage,
                 StageElapsedTime = state.StageElapsedTime,
+                SimulationSpeedMultiplier = simulationSpeedMultiplier,
 
                 // Temperature group
                 Temperature = state.MeasuredTemperature,
@@ -82,6 +94,7 @@ namespace DiplomWork_Ivan_2026.Trends
         public void Clear()
         {
             _points.Clear();
+            Metadata = null;
         }
     }
 }

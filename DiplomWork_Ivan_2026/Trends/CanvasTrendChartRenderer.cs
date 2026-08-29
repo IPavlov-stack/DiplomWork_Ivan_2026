@@ -10,7 +10,11 @@ namespace DiplomWork_Ivan_2026.Trends
 {
     public class CanvasTrendChartRenderer
     {
-        public TrendChartRenderState? Draw(Canvas canvas, List<double> xValues, List<ChartSeries> series)
+        public TrendChartRenderState? Draw(
+            Canvas canvas,
+            List<double> xValues,
+            List<ChartSeries> series,
+            TrendChartViewport? viewport = null)
         {
             canvas.Children.Clear();
 
@@ -42,6 +46,16 @@ namespace DiplomWork_Ivan_2026.Trends
             double maxY = series
                 .Where(s => s.Values.Count > 0)
                 .Max(s => s.Values.Max());
+
+            if (viewport != null &&
+                viewport.MaxX > viewport.MinX &&
+                viewport.MaxY > viewport.MinY)
+            {
+                minX = viewport.MinX;
+                maxX = viewport.MaxX;
+                minY = viewport.MinY;
+                maxY = viewport.MaxY;
+            }
 
             if (Math.Abs(maxX - minX) < 0.0001)
                 maxX = minX + 1;
@@ -85,7 +99,12 @@ namespace DiplomWork_Ivan_2026.Trends
                     StrokeThickness = 3,
                     StrokeLineJoin = PenLineJoin.Round,
                     StrokeStartLineCap = PenLineCap.Round,
-                    StrokeEndLineCap = PenLineCap.Round
+                    StrokeEndLineCap = PenLineCap.Round,
+                    Clip = new RectangleGeometry(new Rect(
+                        renderState.MarginLeft,
+                        renderState.MarginTop,
+                        renderState.PlotWidth,
+                        renderState.PlotHeight))
                 };
 
                 int count = Math.Min(xValues.Count, chartSeries.Values.Count);

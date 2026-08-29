@@ -268,7 +268,7 @@
                             <ComboBoxItem Content="1×" Tag="1"/>
                             <ComboBoxItem Content="10×" Tag="10"/>
                             <ComboBoxItem Content="60×" Tag="60"/>
-                            <ComboBoxItem Content="200×" Tag="200"/>
+                            <ComboBoxItem Content="600×" Tag="600"/>
                         </ComboBox>
                     </StackPanel>
                 </Grid>

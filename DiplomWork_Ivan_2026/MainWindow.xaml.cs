@@ -34,6 +34,9 @@ namespace DiplomWork_Ivan_2026
         private bool _processStarted = false;
         private int _simulationSpeedMultiplier = 1;
         private double _automaticFanSpeedSetpoint = 70.0;
+        private Enums.SensorFaultMode _lastChamberTemperatureFaultMode;
+        private Enums.SensorFaultMode _lastMaterialTemperatureFaultMode;
+        private Enums.SensorFaultMode _lastPressureFaultMode;
 
         private const double SimulationIntegrationStepSeconds = 0.1;
         private const int IntegrationSubstepsPerTrendSample = 10;

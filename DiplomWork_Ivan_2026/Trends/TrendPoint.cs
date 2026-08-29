@@ -5,6 +5,7 @@
         public double Time { get; set; }
         public Enums.ProcessStage ProcessStage { get; set; }
         public double StageElapsedTime { get; set; }
+        public int SimulationSpeedMultiplier { get; set; }
 
         // Temperature group
         public double Temperature { get; set; }                 // Chamber temperature

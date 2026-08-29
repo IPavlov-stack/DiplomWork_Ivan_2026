@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using DiplomWork_Ivan_2026.Models;
 using DiplomWork_Ivan_2026.Trends;
 using DiplomWork_Ivan_2026.Services;
 using IOPath = System.IO.Path;
@@ -23,6 +25,11 @@ namespace DiplomWork_Ivan_2026
         private List<double> _currentXValues = new List<double>();
         private List<ChartSeries> _currentSeries = new List<ChartSeries>();
         private TrendChartRenderState? _renderState;
+        private TrendChartViewport? _zoomViewport;
+        private bool _isZoomModeActive;
+        private bool _isZoomDragging;
+        private Point _zoomStartPoint;
+        private Rectangle? _zoomSelectionRectangle;
 
         public TrendsWindow(TrendBuffer trendBuffer)
         {
@@ -36,6 +43,7 @@ namespace DiplomWork_Ivan_2026
 
             LocalizationService.LanguageChanged += LocalizationService_LanguageChanged;
             ApplyLocalization();
+            UpdateZoomControls();
 
             DrawSelectedTrend();
         }
@@ -43,6 +51,7 @@ namespace DiplomWork_Ivan_2026
         private void LocalizationService_LanguageChanged(object? sender, EventArgs e)
         {
             ApplyLocalization();
+            UpdateZoomControls();
             DrawSelectedTrend();
         }
 
@@ -53,6 +62,9 @@ namespace DiplomWork_Ivan_2026
 
         private void RefreshTimer_Tick(object? sender, EventArgs e)
         {
+            if (_isZoomDragging)
+                return;
+
             DrawSelectedTrend();
         }
 
@@ -61,6 +73,7 @@ namespace DiplomWork_Ivan_2026
             if (MainTrendCanvas == null)
                 return;
 
+            ClearZoomViewport();
             DrawSelectedTrend();
         }
 
@@ -71,6 +84,7 @@ namespace DiplomWork_Ivan_2026
             if (MainTrendCanvas == null)
                 return;
 
+            ClearZoomViewport();
             DrawSelectedTrend();
         }
 
@@ -81,6 +95,7 @@ namespace DiplomWork_Ivan_2026
             if (MainTrendCanvas == null)
                 return;
 
+            ClearZoomViewport();
             DrawSelectedTrend();
         }
 
@@ -94,6 +109,8 @@ namespace DiplomWork_Ivan_2026
                 _currentXValues.Clear();
                 _currentSeries.Clear();
                 _renderState = null;
+                _zoomViewport = null;
+                UpdateZoomControls();
                 return;
             }
 
@@ -117,7 +134,8 @@ namespace DiplomWork_Ivan_2026
             _renderState = _chartRenderer.Draw(
                 MainTrendCanvas,
                 chartData.XValues,
-                displaySeries);
+                displaySeries,
+                _zoomViewport);
         }
 
         private double? GetSelectedTimeRangeSeconds()
@@ -137,6 +155,18 @@ namespace DiplomWork_Ivan_2026
 
         private void MainTrendCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
+            if (_isZoomDragging)
+            {
+                UpdateZoomSelection(e.GetPosition(MainTrendCanvas));
+                return;
+            }
+
+            if (_isZoomModeActive)
+            {
+                RemoveDataCursor();
+                return;
+            }
+
             if (_renderState == null || _currentXValues.Count < 2 || _currentSeries.Count == 0)
                 return;
 
@@ -169,6 +199,208 @@ namespace DiplomWork_Ivan_2026
             DrawDataCursor(pointX, nearestIndex, timeValue);
         }
 
+        private void ZoomButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isZoomModeActive = !_isZoomModeActive;
+
+            if (!_isZoomModeActive)
+                CancelZoomSelection();
+
+            RemoveDataCursor();
+            UpdateZoomControls();
+        }
+
+        private void ResetZoomButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetZoomView();
+        }
+
+        private void MainTrendCanvas_MouseLeftButtonDown(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (!_isZoomModeActive || _renderState == null)
+                return;
+
+            Point position = e.GetPosition(MainTrendCanvas);
+            if (!IsInsidePlot(position))
+                return;
+
+            RemoveDataCursor();
+            CancelZoomSelection();
+
+            _zoomStartPoint = ClampToPlot(position);
+            _zoomSelectionRectangle = new Rectangle
+            {
+                Width = 0,
+                Height = 0,
+                Fill = new SolidColorBrush(Color.FromArgb(55, 30, 144, 255)),
+                Stroke = Brushes.DeepSkyBlue,
+                StrokeThickness = 2,
+                StrokeDashArray = new DoubleCollection { 5, 3 },
+                IsHitTestVisible = false,
+                Tag = "ZoomSelection"
+            };
+
+            Canvas.SetLeft(_zoomSelectionRectangle, _zoomStartPoint.X);
+            Canvas.SetTop(_zoomSelectionRectangle, _zoomStartPoint.Y);
+            MainTrendCanvas.Children.Add(_zoomSelectionRectangle);
+
+            _isZoomDragging = true;
+            MainTrendCanvas.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void MainTrendCanvas_MouseLeftButtonUp(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (!_isZoomDragging || _renderState == null)
+                return;
+
+            Point endPoint = ClampToPlot(e.GetPosition(MainTrendCanvas));
+            double left = Math.Min(_zoomStartPoint.X, endPoint.X);
+            double right = Math.Max(_zoomStartPoint.X, endPoint.X);
+            double top = Math.Min(_zoomStartPoint.Y, endPoint.Y);
+            double bottom = Math.Max(_zoomStartPoint.Y, endPoint.Y);
+
+            CancelZoomSelection();
+            e.Handled = true;
+
+            const double MinimumSelectionPixels = 12.0;
+            if (right - left < MinimumSelectionPixels ||
+                bottom - top < MinimumSelectionPixels)
+            {
+                return;
+            }
+
+            double xRange = _renderState.MaxX - _renderState.MinX;
+            double yRange = _renderState.MaxY - _renderState.MinY;
+
+            _zoomViewport = new TrendChartViewport
+            {
+                MinX = _renderState.MinX +
+                    (left - _renderState.MarginLeft) /
+                    _renderState.PlotWidth * xRange,
+                MaxX = _renderState.MinX +
+                    (right - _renderState.MarginLeft) /
+                    _renderState.PlotWidth * xRange,
+                MinY = _renderState.MaxY -
+                    (bottom - _renderState.MarginTop) /
+                    _renderState.PlotHeight * yRange,
+                MaxY = _renderState.MaxY -
+                    (top - _renderState.MarginTop) /
+                    _renderState.PlotHeight * yRange
+            };
+
+            UpdateZoomControls();
+            DrawSelectedTrend();
+        }
+
+        private void MainTrendCanvas_MouseRightButtonDown(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (_zoomViewport == null && !_isZoomDragging)
+                return;
+
+            ResetZoomView();
+            e.Handled = true;
+        }
+
+        private void UpdateZoomSelection(Point currentPosition)
+        {
+            if (_zoomSelectionRectangle == null)
+                return;
+
+            Point endPoint = ClampToPlot(currentPosition);
+            double left = Math.Min(_zoomStartPoint.X, endPoint.X);
+            double top = Math.Min(_zoomStartPoint.Y, endPoint.Y);
+
+            Canvas.SetLeft(_zoomSelectionRectangle, left);
+            Canvas.SetTop(_zoomSelectionRectangle, top);
+            _zoomSelectionRectangle.Width =
+                Math.Abs(endPoint.X - _zoomStartPoint.X);
+            _zoomSelectionRectangle.Height =
+                Math.Abs(endPoint.Y - _zoomStartPoint.Y);
+        }
+
+        private bool IsInsidePlot(Point point)
+        {
+            if (_renderState == null)
+                return false;
+
+            return point.X >= _renderState.MarginLeft &&
+                point.X <= _renderState.MarginLeft + _renderState.PlotWidth &&
+                point.Y >= _renderState.MarginTop &&
+                point.Y <= _renderState.MarginTop + _renderState.PlotHeight;
+        }
+
+        private Point ClampToPlot(Point point)
+        {
+            if (_renderState == null)
+                return point;
+
+            return new Point(
+                Math.Clamp(
+                    point.X,
+                    _renderState.MarginLeft,
+                    _renderState.MarginLeft + _renderState.PlotWidth),
+                Math.Clamp(
+                    point.Y,
+                    _renderState.MarginTop,
+                    _renderState.MarginTop + _renderState.PlotHeight));
+        }
+
+        private void CancelZoomSelection()
+        {
+            _isZoomDragging = false;
+
+            if (MainTrendCanvas?.IsMouseCaptured == true)
+                MainTrendCanvas.ReleaseMouseCapture();
+
+            if (_zoomSelectionRectangle != null)
+                MainTrendCanvas?.Children.Remove(_zoomSelectionRectangle);
+
+            _zoomSelectionRectangle = null;
+        }
+
+        private void ClearZoomViewport()
+        {
+            CancelZoomSelection();
+            _zoomViewport = null;
+            UpdateZoomControls();
+        }
+
+        private void ResetZoomView()
+        {
+            ClearZoomViewport();
+            DrawSelectedTrend();
+        }
+
+        private void UpdateZoomControls()
+        {
+            if (ZoomButton == null || ResetZoomButton == null || MainTrendCanvas == null)
+                return;
+
+            ZoomButton.Background = new SolidColorBrush(
+                _isZoomModeActive
+                    ? Color.FromRgb(46, 125, 50)
+                    : Color.FromRgb(69, 90, 100));
+            ZoomButton.ToolTip = LocalizationService.Text(
+                "Activate rectangle zoom. Drag over the chart to zoom in.",
+                "Активира правоъгълно приближаване. Очертайте област върху графиката.");
+            ResetZoomButton.ToolTip = LocalizationService.Text(
+                "Reset the chart zoom.",
+                "Връща пълния изглед на графиката.");
+            ResetZoomButton.Visibility = _zoomViewport == null
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            MainTrendCanvas.Cursor = _isZoomModeActive
+                ? Cursors.Cross
+                : Cursors.Arrow;
+        }
+
         private int FindNearestPointIndex(double mouseX)
         {
             if (_renderState == null)
@@ -179,6 +411,12 @@ namespace DiplomWork_Ivan_2026
 
             for (int i = 0; i < _currentXValues.Count; i++)
             {
+                if (_currentXValues[i] < _renderState.MinX ||
+                    _currentXValues[i] > _renderState.MaxX)
+                {
+                    continue;
+                }
+
                 double pointX =
                     _renderState.MarginLeft +
                     (_currentXValues[i] - _renderState.MinX) /
@@ -271,8 +509,12 @@ namespace DiplomWork_Ivan_2026
                     (_renderState.MaxY - _renderState.MinY) *
                     _renderState.PlotHeight;
 
-                AddCursorMarker(pointX, pointY, series.Brush);
-                AddCursorGuideLine(pointX, pointY, series.Brush);
+                if (pointY >= _renderState.MarginTop &&
+                    pointY <= _renderState.MarginTop + _renderState.PlotHeight)
+                {
+                    AddCursorMarker(pointX, pointY, series.Brush);
+                    AddCursorGuideLine(pointX, pointY, series.Brush);
+                }
 
                 TextBlock valueText = new TextBlock
                 {
@@ -358,7 +600,9 @@ namespace DiplomWork_Ivan_2026
             }
 
             TrendPoint[] snapshot = _trendBuffer.Points.ToArray();
-            string exportDirectory = GetExportDirectory();
+            ExperimentMetadata? metadata =
+                _trendBuffer.Metadata?.CreateSnapshot();
+            string exportDirectory = ExportDirectoryProvider.GetExportDirectory();
             string filePath = IOPath.Combine(
                 exportDirectory,
                 $"vacuum_dryer_{DateTime.Now:yyyyMMdd_HHmmss_fff}.csv");
@@ -369,7 +613,7 @@ namespace DiplomWork_Ivan_2026
                 await Task.Run(() =>
                 {
                     Directory.CreateDirectory(exportDirectory);
-                    TrendCsvExporter.Export(filePath, snapshot);
+                    TrendCsvExporter.Export(filePath, snapshot, metadata);
                 });
 
                 MessageBox.Show(
@@ -394,25 +638,6 @@ namespace DiplomWork_Ivan_2026
             {
                 ExportCsvButton.IsEnabled = true;
             }
-        }
-
-        private static string GetExportDirectory()
-        {
-            DirectoryInfo? directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-            while (directory != null)
-            {
-                if (File.Exists(IOPath.Combine(
-                    directory.FullName,
-                    "DiplomWork_Ivan_2026.csproj")))
-                {
-                    return IOPath.Combine(directory.FullName, "Exports");
-                }
-
-                directory = directory.Parent;
-            }
-
-            return IOPath.Combine(AppContext.BaseDirectory, "Exports");
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

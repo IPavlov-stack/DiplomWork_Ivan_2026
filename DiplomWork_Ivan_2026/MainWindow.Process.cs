@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Windows;
 using DiplomWork_Ivan_2026.Controllers;
 using DiplomWork_Ivan_2026.Models;
@@ -41,7 +42,8 @@ namespace DiplomWork_Ivan_2026
 
                 _process.LoadMaterial(material);
                 _automaticProcessController.Reset(_process.State, _settings);
-                _trendBuffer.Clear();
+                _trendBuffer.BeginExperiment(CreateExperimentMetadata(material));
+                ResetDisturbanceTracking();
 
                 _processStarted = true;
             }
@@ -134,7 +136,11 @@ namespace DiplomWork_Ivan_2026
                         break;
                 }
 
-                _trendBuffer.AddPoint(_process.State, _settings);
+                TrackSensorFaultDisturbances();
+                _trendBuffer.AddPoint(
+                    _process.State,
+                    _settings,
+                    _simulationSpeedMultiplier);
                 _alarmService.CheckAlarms(_process, _settings);
 
                 if (_process.State.IsCompleted)
@@ -295,6 +301,109 @@ namespace DiplomWork_Ivan_2026
             _process.Pump.TurnOff();
             _process.VentValve.Close();
             _process.Fan.TurnOff();
+        }
+
+        private ExperimentMetadata CreateExperimentMetadata(DryingMaterial material)
+        {
+            Enums.DryingMode dryingMode = GetSelectedDryingMode();
+            DryingRecipe recipe = material.GetRecipe(dryingMode);
+
+            return new ExperimentMetadata
+            {
+                ExperimentId = Guid.NewGuid().ToString("D"),
+                RunLabel = RunLabelGenerator.Create(material.Name, dryingMode),
+                StartedAt = DateTimeOffset.Now,
+                ProgramVersion = GetProgramVersion(),
+                MaterialName = material.Name,
+                RecipeName = dryingMode.ToString(),
+                OperationMode = OperationModeComboBox.SelectedIndex == 0
+                    ? "Auto"
+                    : "Manual",
+                TemperatureControlMode = TemperatureControlComboBox.SelectedIndex == 1
+                    ? "PID"
+                    : "OnOff",
+                TemperatureSetpointC = _settings.TemperatureSetpoint,
+                PressureSetpointKPa = _settings.PressureSetpoint,
+                AutomaticFanSetpointPercent = _automaticFanSpeedSetpoint,
+                RecipeTemperatureSetpointC = recipe.TemperatureSetpointC,
+                RecipePressureSetpointKPa = recipe.PressureSetpointKPa,
+                RecipeFanSpeedPercent = recipe.FanSpeedPercent,
+                MaximumAllowedTemperatureC = material.MaxTemperature,
+                InitialWetMassKg = material.InitialWetMassKg,
+                DryMassKg = material.DryMassKg,
+                InitialMoistureWetBasisPercent = material.InitialMoistureWetBasisPercent,
+                TargetMoistureWetBasisPercent = material.TargetMoistureWetBasisPercent,
+                DryingCoefficient = material.DryingCoefficient,
+                TemperaturePidKp = _pidTemperatureController.Kp,
+                TemperaturePidKi = _pidTemperatureController.Ki,
+                TemperaturePidKd = _pidTemperatureController.Kd,
+                TemperaturePidDerivativeFilterSeconds =
+                    _pidTemperatureController.DerivativeFilterTimeConstantSeconds,
+                PressurePiKp = _pressureController.Kp,
+                PressurePiKi = _pressureController.Ki,
+                ModelStepSeconds = SimulationIntegrationStepSeconds,
+                ControllerStepSeconds = SimulationIntegrationStepSeconds,
+                TrendSampleIntervalSeconds =
+                    SimulationIntegrationStepSeconds * IntegrationSubstepsPerTrendSample,
+                SimulationSpeedAtStart = _simulationSpeedMultiplier,
+                AmbientTemperatureC = _settings.AmbientTemperature,
+                AmbientPressureKPa = _settings.AmbientPressure,
+                AmbientRelativeHumidityPercent =
+                    _settings.AmbientRelativeHumidityPercent
+            };
+        }
+
+        private static string GetProgramVersion()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            return assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion ??
+                assembly.GetName().Version?.ToString() ??
+                "Unknown";
+        }
+
+        private void ResetDisturbanceTracking()
+        {
+            _lastChamberTemperatureFaultMode =
+                _process.ChamberTemperatureSensor.FaultMode;
+            _lastMaterialTemperatureFaultMode =
+                _process.MaterialTemperatureSensor.FaultMode;
+            _lastPressureFaultMode = _process.PressureSensor.FaultMode;
+        }
+
+        private void TrackSensorFaultDisturbances()
+        {
+            TrackSensorFaultDisturbance(
+                "ChamberTemperatureSensor",
+                _process.ChamberTemperatureSensor.FaultMode,
+                ref _lastChamberTemperatureFaultMode);
+            TrackSensorFaultDisturbance(
+                "MaterialTemperatureSensor",
+                _process.MaterialTemperatureSensor.FaultMode,
+                ref _lastMaterialTemperatureFaultMode);
+            TrackSensorFaultDisturbance(
+                "PressureSensor",
+                _process.PressureSensor.FaultMode,
+                ref _lastPressureFaultMode);
+        }
+
+        private void TrackSensorFaultDisturbance(
+            string sensorName,
+            Enums.SensorFaultMode currentMode,
+            ref Enums.SensorFaultMode previousMode)
+        {
+            if (currentMode == previousMode)
+                return;
+
+            if (currentMode != Enums.SensorFaultMode.None)
+            {
+                _trendBuffer.Metadata?.AddDisturbance(
+                    $"{sensorName}:{currentMode}",
+                    _process.State.ElapsedTime);
+            }
+
+            previousMode = currentMode;
         }
     }
 }

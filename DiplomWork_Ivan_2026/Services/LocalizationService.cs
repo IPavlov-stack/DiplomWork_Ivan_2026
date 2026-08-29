@@ -98,6 +98,10 @@ namespace DiplomWork_Ivan_2026.Services
                 ["Changes only the chart appearance; stored process data is not modified."] = "Променя само изгледа на графиката; записаните процесни данни не се променят.",
                 ["EXPORT CSV"] = "ЕКСПОРТ CSV",
                 ["Export all stored raw process samples to a CSV file."] = "Експортира всички съхранени необработени процесни проби в CSV файл.",
+                ["ZOOM"] = "ЛУПА",
+                ["RESET"] = "НУЛИРАЙ",
+                ["Activate rectangle zoom. Drag over the chart to zoom in."] = "Активира правоъгълно приближаване. Очертайте област върху графиката.",
+                ["Reset the chart zoom."] = "Връща пълния изглед на графиката.",
                 ["Current: 0.0"] = "Текуща: 0.0",
                 ["Temperature [°C]"] = "Температура [°C]",
 

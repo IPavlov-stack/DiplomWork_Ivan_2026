@@ -22,7 +22,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="285"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock x:Name="WindowTitleTextBlock" Text="Vacuum Dryer Process Trends"
@@ -35,6 +35,37 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center">
+                <Button x:Name="ZoomButton"
+                        Width="100"
+                        Height="40"
+                        Margin="0,0,10,0"
+                        Background="#455A64"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        ToolTip="Activate rectangle zoom. Drag over the chart to zoom in."
+                        Click="ZoomButton_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#x1F50D;"
+                                   FontFamily="Segoe UI Emoji"
+                                   FontSize="16"
+                                   Margin="0,0,6,0"/>
+                        <TextBlock Text="ZOOM"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="ResetZoomButton"
+                        Content="RESET"
+                        Width="75"
+                        Height="40"
+                        Margin="0,0,10,0"
+                        Visibility="Collapsed"
+                        Background="#616161"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        ToolTip="Reset the chart zoom."
+                        Click="ResetZoomButton_Click"/>
+
                 <Button x:Name="ExportCsvButton"
                         Content="EXPORT CSV"
                         Width="145"
@@ -169,6 +200,9 @@
                 <Canvas x:Name="MainTrendCanvas"
                         Grid.Row="1"
                         Background="#1E1E1E"
+                        MouseLeftButtonDown="MainTrendCanvas_MouseLeftButtonDown"
+                        MouseLeftButtonUp="MainTrendCanvas_MouseLeftButtonUp"
+                        MouseRightButtonDown="MainTrendCanvas_MouseRightButtonDown"
                         MouseMove="MainTrendCanvas_MouseMove"
                         MouseLeave="MainTrendCanvas_MouseLeave"/>
             </Grid>
