@@ -22,7 +22,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="285"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock x:Name="WindowTitleTextBlock" Text="Vacuum Dryer Process Trends"
@@ -31,17 +31,30 @@
                        FontWeight="Bold"
                        VerticalAlignment="Center"/>
 
-            <Button x:Name="CloseButton"
-                    Grid.Column="1"
-                    Content="CLOSE"
-                    Width="100"
-                    Height="40"
-                    Background="#B71C1C"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Click="CloseButton_Click"/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <Button x:Name="ExportCsvButton"
+                        Content="EXPORT CSV"
+                        Width="145"
+                        Height="40"
+                        Margin="0,0,15,0"
+                        Background="#1976D2"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        ToolTip="Export all stored raw process samples to a CSV file."
+                        Click="ExportCsvButton_Click"/>
+
+                <Button x:Name="CloseButton"
+                        Content="CLOSE"
+                        Width="100"
+                        Height="40"
+                        Background="#B71C1C"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Click="CloseButton_Click"/>
+            </StackPanel>
         </Grid>
 
         <!-- Controls -->

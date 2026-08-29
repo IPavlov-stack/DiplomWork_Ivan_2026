@@ -96,6 +96,8 @@ namespace DiplomWork_Ivan_2026.Services
                 ["Raw"] = "Необработена",
                 ["Smooth"] = "Плавна",
                 ["Changes only the chart appearance; stored process data is not modified."] = "Променя само изгледа на графиката; записаните процесни данни не се променят.",
+                ["EXPORT CSV"] = "ЕКСПОРТ CSV",
+                ["Export all stored raw process samples to a CSV file."] = "Експортира всички съхранени необработени процесни проби в CSV файл.",
                 ["Current: 0.0"] = "Текуща: 0.0",
                 ["Temperature [°C]"] = "Температура [°C]",
 

@@ -22,37 +22,59 @@ namespace DiplomWork_Ivan_2026.Trends
             _points.Add(new TrendPoint
             {
                 Time = state.ElapsedTime,
+                ProcessStage = state.ProcessStage,
+                StageElapsedTime = state.StageElapsedTime,
 
                 // Temperature group
                 Temperature = state.MeasuredTemperature,
                 MaterialTemperature = state.MeasuredMaterialTemperature,
                 TemperatureSetpoint = state.ActiveTemperatureSetpoint,
+                ModelTemperature = state.Temperature,
+                ModelMaterialTemperature = state.MaterialTemperature,
 
                 // Pressure group
                 Pressure = state.MeasuredPressure,
                 PressureSetpoint = state.ActivePressureSetpoint,
                 VacuumLevel = state.VacuumLevel,
+                ModelPressure = state.Pressure,
 
                 // Moisture / humidity group
                 MaterialMoisture = state.MaterialMoistureWetBasisPercent,
+                MaterialMoistureDryBasis = state.MaterialMoistureDryBasis,
                 EquilibriumMoisture =
                     DryingMaterial.DryBasisToWetBasisPercent(
                         state.DynamicEquilibriumMoistureDryBasis),
                 AirHumidity = state.AirHumidity,
+                MoistureRatio = state.MoistureRatio,
 
                 // Drying group
                 DryingRate = state.DryingRateWetBasisPercentPerMinute,
+                AirFlowRate = state.AirFlowRate,
+                EvaporationRateKgPerSecond = state.EvaporationRateKgPerSecond,
 
                 // Energy group
                 TotalEnergyKWh = state.TotalEnergyKWh,
                 EvaporatedWaterKg = state.EvaporatedWaterKg,
                 EfficiencyKgPerKWh = state.EfficiencyKgPerKWh,
 
+                // Water-vapour balance group
+                WaterVaporPartialPressureKPa = state.WaterVaporPartialPressureKPa,
+                WaterVaporMassKg = state.WaterVaporMassKg,
+                PumpedWaterVaporKg = state.PumpedWaterVaporKg,
+                CondensedWaterKg = state.CondensedWaterKg,
+                AmbientWaterVaporIngressKg = state.AmbientWaterVaporIngressKg,
+                WaterVaporMassBalanceResidualKg = state.WaterVaporMassBalanceResidualKg,
+
                 // Actuator group
                 HeaterPower = state.HeaterPower,
                 PumpPower = state.VacuumPumpPower,
                 VentValveOpening = state.VentValveOpening,
-                FanSpeed = state.FanSpeed
+                FanSpeed = state.FanSpeed,
+
+                // Process flags
+                MoistureTargetReached = state.MoistureTargetReached,
+                SafetyInterlockActive = state.SafetyInterlockActive,
+                IsCompleted = state.IsCompleted
             });
 
         }

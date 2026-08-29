@@ -64,21 +64,25 @@
                       BorderBrush="#777"
                       FontSize="16">
 
-                <StackPanel Margin="15">
-                    <TextBlock x:Name="ChamberTemperatureTextBlock" Foreground="OrangeRed" FontSize="16"/>
-                    <TextBlock x:Name="MaterialTemperatureTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="TemperatureSetpointTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="PressureTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="PressureSetpointTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="VacuumLevelTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="AirHumidityTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="VaporPressureTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="MaterialMoistureTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="EquilibriumMoistureTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="MoistureRatioTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="DryingRateTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
-                    <TextBlock x:Name="AirFlowRateTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              PanningMode="VerticalOnly">
+                    <StackPanel Margin="15">
+                        <TextBlock x:Name="ChamberTemperatureTextBlock" Foreground="OrangeRed" FontSize="16"/>
+                        <TextBlock x:Name="MaterialTemperatureTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="TemperatureSetpointTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="PressureTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="PressureSetpointTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="VacuumLevelTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="AirHumidityTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="VaporPressureTextBlock" Foreground="DeepSkyBlue" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="MaterialMoistureTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="EquilibriumMoistureTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="MoistureRatioTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="DryingRateTextBlock" Foreground="Gold" FontSize="16" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="AirFlowRateTextBlock" Foreground="LimeGreen" FontSize="16" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
             </GroupBox>
 
             <!-- Material Data -->
