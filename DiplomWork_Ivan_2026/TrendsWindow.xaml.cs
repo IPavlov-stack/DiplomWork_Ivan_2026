@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,7 +10,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Trends;
 using DiplomWork_Ivan_2026.Services;
-using Microsoft.Win32;
+using IOPath = System.IO.Path;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -356,34 +357,25 @@ namespace DiplomWork_Ivan_2026
                 return;
             }
 
-            SaveFileDialog saveDialog = new SaveFileDialog
-            {
-                Title = LocalizationService.Text(
-                    "Export process data to CSV",
-                    "Експорт на процесните данни в CSV"),
-                Filter = LocalizationService.Text(
-                    "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
-                    "CSV файлове (*.csv)|*.csv|Всички файлове (*.*)|*.*"),
-                DefaultExt = ".csv",
-                AddExtension = true,
-                FileName = $"vacuum_dryer_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
-            };
-
-            if (saveDialog.ShowDialog(this) != true)
-                return;
-
             TrendPoint[] snapshot = _trendBuffer.Points.ToArray();
+            string exportDirectory = GetExportDirectory();
+            string filePath = IOPath.Combine(
+                exportDirectory,
+                $"vacuum_dryer_{DateTime.Now:yyyyMMdd_HHmmss_fff}.csv");
             ExportCsvButton.IsEnabled = false;
 
             try
             {
                 await Task.Run(() =>
-                    TrendCsvExporter.Export(saveDialog.FileName, snapshot));
+                {
+                    Directory.CreateDirectory(exportDirectory);
+                    TrendCsvExporter.Export(filePath, snapshot);
+                });
 
                 MessageBox.Show(
                     LocalizationService.Text(
-                        $"Successfully exported {snapshot.Length} process samples.",
-                        $"Успешно са експортирани {snapshot.Length} процесни проби."),
+                        $"Successfully exported {snapshot.Length} process samples to:\n{filePath}",
+                        $"Успешно са експортирани {snapshot.Length} процесни проби в:\n{filePath}"),
                     LocalizationService.Text("CSV export", "CSV експорт"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
@@ -402,6 +394,25 @@ namespace DiplomWork_Ivan_2026
             {
                 ExportCsvButton.IsEnabled = true;
             }
+        }
+
+        private static string GetExportDirectory()
+        {
+            DirectoryInfo? directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+            while (directory != null)
+            {
+                if (File.Exists(IOPath.Combine(
+                    directory.FullName,
+                    "DiplomWork_Ivan_2026.csproj")))
+                {
+                    return IOPath.Combine(directory.FullName, "Exports");
+                }
+
+                directory = directory.Parent;
+            }
+
+            return IOPath.Combine(AppContext.BaseDirectory, "Exports");
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
