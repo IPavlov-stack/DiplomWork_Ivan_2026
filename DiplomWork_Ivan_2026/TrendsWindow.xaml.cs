@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -7,6 +9,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using DiplomWork_Ivan_2026.Trends;
 using DiplomWork_Ivan_2026.Services;
+using Microsoft.Win32;
 
 namespace DiplomWork_Ivan_2026
 {
@@ -337,6 +340,68 @@ namespace DiplomWork_Ivan_2026
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private async void ExportCsvButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_trendBuffer.Points.Count == 0)
+            {
+                MessageBox.Show(
+                    LocalizationService.Text(
+                        "There are no process samples to export.",
+                        "Няма процесни проби за експортиране."),
+                    LocalizationService.Text("CSV export", "CSV експорт"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            SaveFileDialog saveDialog = new SaveFileDialog
+            {
+                Title = LocalizationService.Text(
+                    "Export process data to CSV",
+                    "Експорт на процесните данни в CSV"),
+                Filter = LocalizationService.Text(
+                    "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
+                    "CSV файлове (*.csv)|*.csv|Всички файлове (*.*)|*.*"),
+                DefaultExt = ".csv",
+                AddExtension = true,
+                FileName = $"vacuum_dryer_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+            };
+
+            if (saveDialog.ShowDialog(this) != true)
+                return;
+
+            TrendPoint[] snapshot = _trendBuffer.Points.ToArray();
+            ExportCsvButton.IsEnabled = false;
+
+            try
+            {
+                await Task.Run(() =>
+                    TrendCsvExporter.Export(saveDialog.FileName, snapshot));
+
+                MessageBox.Show(
+                    LocalizationService.Text(
+                        $"Successfully exported {snapshot.Length} process samples.",
+                        $"Успешно са експортирани {snapshot.Length} процесни проби."),
+                    LocalizationService.Text("CSV export", "CSV експорт"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(
+                    LocalizationService.Text(
+                        $"The CSV file could not be saved.\n{exception.Message}",
+                        $"CSV файлът не можа да бъде записан.\n{exception.Message}"),
+                    LocalizationService.Text("CSV export error", "Грешка при CSV експорт"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                ExportCsvButton.IsEnabled = true;
+            }
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)

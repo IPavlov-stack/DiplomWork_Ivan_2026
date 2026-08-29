@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using DiplomWork_Ivan_2026.Services;
 
 namespace DiplomWork_Ivan_2026
@@ -21,8 +22,13 @@ namespace DiplomWork_Ivan_2026
             LocalizationService.ApplyStaticText(this);
             StatusLabelRun.Text = LocalizationService.Text("Status: ", "Статус: ");
             LanguageButton.Content = LocalizationService.IsBulgarian
-                ? "English"
-                : "Български";
+                ? "Български"
+                : "English";
+            LanguageFlagImage.Source = new BitmapImage(new Uri(
+                LocalizationService.IsBulgarian
+                    ? "/Assets/Flags/bg_flag.png"
+                    : "/Assets/Flags/gb_flag.png",
+                UriKind.Relative));
             LanguageButton.ToolTip = LocalizationService.Text(
                 "Switch interface language to Bulgarian",
                 "Смяна на езика на интерфейса на английски");
@@ -30,6 +36,7 @@ namespace DiplomWork_Ivan_2026
             MaterialComboBox.Items.Refresh();
             if (!_processStarted && MaterialComboBox.SelectedItem != null)
                 ApplyDryingMode(GetSelectedDryingMode());
+
             UpdateUi();
         }
     }

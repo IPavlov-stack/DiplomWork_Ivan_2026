@@ -513,18 +513,27 @@
 
                         </Canvas>
                     </Canvas>
-                    <Button x:Name="LanguageButton"
-                            Content="Български"
-                            Width="152"
-                            Height="38"
-                            Margin="0,12,12,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Panel.ZIndex="10"
-                            Background="#455A64"
-                            Foreground="White"
-                            FontWeight="SemiBold"
-                            Click="LanguageButton_Click"/>
+                    <StackPanel Margin="0,12,12,0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="10">
+                        <Image x:Name="LanguageFlagImage"
+                               Source="/Assets/Flags/bg_flag.png"
+                               Width="50"
+                               Height="38"
+                               Margin="0,0,8,0"
+                               Stretch="Uniform"/>
+
+                        <Button x:Name="LanguageButton"
+                                Content="Български"
+                                Width="152"
+                                Height="38"
+                                Background="#455A64"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                Click="LanguageButton_Click"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 
