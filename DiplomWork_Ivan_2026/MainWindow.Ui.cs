@@ -220,6 +220,8 @@ namespace DiplomWork_Ivan_2026
 
             var state = _process.State;
             ClearContextValues();
+            ControllerSettingsButton.Visibility = Visibility.Collapsed;
+            ControllerSettingsButton.IsEnabled = !_processStarted && !_isRunning;
             string controllerMode = TemperatureControlComboBox?.SelectedIndex == 1
                 ? "PID"
                 : "ON/OFF";
@@ -242,6 +244,11 @@ namespace DiplomWork_Ivan_2026
                         $"{L("Chamber temperature", "Температура в камерата")}: {state.MeasuredTemperature:F1} °C", Brushes.OrangeRed);
                     SetContextValue(ContextValue4TextBlock,
                         $"{L("Temperature setpoint", "Задание за температура")}: {state.ActiveTemperatureSetpoint:F1} °C", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue5TextBlock,
+                        $"Kp={_pidTemperatureController.Kp:0.###}; " +
+                        $"Ki={_pidTemperatureController.Ki:0.###}; " +
+                        $"Kd={_pidTemperatureController.Kd:0.###}", SemanticNeutral);
+                    ConfigureControllerSettingsButton("PID SETTINGS", "PID НАСТРОЙКИ");
                     break;
 
                 case "Pump":
@@ -260,6 +267,10 @@ namespace DiplomWork_Ivan_2026
                         $"{L("Pressure setpoint", "Задание за налягане")}: {state.ActivePressureSetpoint:F1} kPa", Brushes.Gold);
                     SetContextValue(ContextValue4TextBlock,
                         $"{L("Vacuum level", "Ниво на вакуум")}: {state.VacuumLevel:F1} %", Brushes.DeepSkyBlue);
+                    SetContextValue(ContextValue5TextBlock,
+                        $"Kp={_pressureController.Kp:0.###}; " +
+                        $"Ki={_pressureController.Ki:0.###}", SemanticNeutral);
+                    ConfigureControllerSettingsButton("PI SETTINGS", "PI НАСТРОЙКИ");
                     break;
 
                 case "Fan":
@@ -317,6 +328,78 @@ namespace DiplomWork_Ivan_2026
                         $"{L("Moisture target", "Целева влага")}: {moistureTarget}", Brushes.Gold);
                     break;
             }
+        }
+
+        private void ConfigureControllerSettingsButton(
+            string englishContent,
+            string bulgarianContent)
+        {
+            ControllerSettingsButton.Content = L(englishContent, bulgarianContent);
+            ControllerSettingsButton.Visibility = Visibility.Visible;
+            ControllerSettingsButton.ToolTip = ControllerSettingsButton.IsEnabled
+                ? L(
+                    "Edit the controller coefficients.",
+                    "Промяна на коефициентите на регулатора.")
+                : L(
+                    "Controller coefficients can be changed before starting a batch.",
+                    "Коефициентите могат да се променят преди стартиране на партида.");
+        }
+
+        private void ControllerSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_processStarted || _isRunning)
+            {
+                MessageBox.Show(
+                    L(
+                        "Controller coefficients can be changed before starting a batch.",
+                        "Коефициентите могат да се променят преди стартиране на партида."),
+                    L("Controller settings", "Настройки на регулатора"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            ControllerSettingsWindow settingsWindow;
+
+            if (_selectedProcessObject == "Heater")
+            {
+                settingsWindow = new ControllerSettingsWindow(
+                    ControllerSettingsMode.TemperaturePid,
+                    _pidTemperatureController.Kp,
+                    _pidTemperatureController.Ki,
+                    _pidTemperatureController.Kd);
+            }
+            else if (_selectedProcessObject == "Pump")
+            {
+                settingsWindow = new ControllerSettingsWindow(
+                    ControllerSettingsMode.PressurePi,
+                    _pressureController.Kp,
+                    _pressureController.Ki);
+            }
+            else
+            {
+                return;
+            }
+
+            settingsWindow.Owner = this;
+            if (settingsWindow.ShowDialog() != true)
+                return;
+
+            if (_selectedProcessObject == "Heater")
+            {
+                _pidTemperatureController.Kp = settingsWindow.Kp;
+                _pidTemperatureController.Ki = settingsWindow.Ki;
+                _pidTemperatureController.Kd = settingsWindow.Kd;
+                _pidTemperatureController.Reset();
+            }
+            else
+            {
+                _pressureController.Kp = settingsWindow.Kp;
+                _pressureController.Ki = settingsWindow.Ki;
+                _pressureController.Reset();
+            }
+
+            UpdateSelectedObjectPanel();
         }
 
         private void ClearContextValues()

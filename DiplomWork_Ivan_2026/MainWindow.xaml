@@ -701,6 +701,16 @@
                                 <TextBlock x:Name="ContextValue6TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
                                 <TextBlock x:Name="ContextValue7TextBlock" TextWrapping="Wrap" FontSize="12" Margin="0,3,0,0"/>
                             </StackPanel>
+                            <Button x:Name="ControllerSettingsButton"
+                                    Content="CONTROLLER SETTINGS"
+                                    Height="34"
+                                    Margin="0,0,0,10"
+                                    Background="#455A64"
+                                    BorderBrush="#78909C"
+                                    Foreground="White"
+                                    FontWeight="SemiBold"
+                                    Visibility="Collapsed"
+                                    Click="ControllerSettingsButton_Click"/>
                             <Separator Background="#555" Margin="0,0,0,10"/>
                             <TextBlock Text="Actuator outputs"
                                        Foreground="White"

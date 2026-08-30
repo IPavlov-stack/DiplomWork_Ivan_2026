@@ -4,9 +4,13 @@ namespace DiplomWork_Ivan_2026.Controllers
 {
     public class PidTemperatureController
     {
-        public double Kp { get; set; } = 8.5;
-        public double Ki { get; set; } = 1.2;
-        public double Kd { get; set; } = 0.7;
+        public const double DefaultKp = 8.5;
+        public const double DefaultKi = 1.2;
+        public const double DefaultKd = 0.7;
+
+        public double Kp { get; set; } = DefaultKp;
+        public double Ki { get; set; } = DefaultKi;
+        public double Kd { get; set; } = DefaultKd;
 
         // First order lowpass filter for the derivative term.
         // The derivative is calculated from the measured temperature to avoid derivative kick

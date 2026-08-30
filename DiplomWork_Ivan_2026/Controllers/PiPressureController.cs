@@ -6,10 +6,13 @@ namespace DiplomWork_Ivan_2026.Controllers
 {
     public class PiPressureController
     {
+        public const double DefaultKp = 4.0;
+        public const double DefaultKi = 0.15;
+
         // Controller output is pump power [%]. A positive error means that the
         // pressure is above the setpoint and more vacuum-pump power is needed.
-        public double Kp { get; set; } = 4.0;
-        public double Ki { get; set; } = 0.15;
+        public double Kp { get; set; } = DefaultKp;
+        public double Ki { get; set; } = DefaultKi;
 
         public double MinOutput { get; set; } = 0.0;
         public double MaxOutput { get; set; } = 100.0;
