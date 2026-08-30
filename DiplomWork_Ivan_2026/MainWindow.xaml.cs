@@ -38,8 +38,14 @@ namespace DiplomWork_Ivan_2026
         private Enums.SensorFaultMode _lastMaterialTemperatureFaultMode;
         private Enums.SensorFaultMode _lastPressureFaultMode;
 
-        private const double SimulationIntegrationStepSeconds = 0.1;
-        private const int IntegrationSubstepsPerTrendSample = 10;
+        private const double FixedTrendSampleIntervalSeconds = 1.0;
+        private double _modelStepSeconds = 0.1;
+        private double _controllerStepSeconds = 0.1;
+        private double _controllerElapsedSeconds = 0.1;
+        private int IntegrationSubstepsPerTrendSample => Math.Max(
+            1,
+            (int)Math.Round(
+                FixedTrendSampleIntervalSeconds / _modelStepSeconds));
 
         public ISeries[] ProcessSeries { get; set; } = System.Array.Empty<ISeries>();
         public Axis[] XAxes { get; set; } = System.Array.Empty<Axis>();

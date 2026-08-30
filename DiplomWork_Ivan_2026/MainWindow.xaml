@@ -769,14 +769,34 @@
                     </ScrollViewer>
                 </GroupBox>
 
-                <Button x:Name="ExitButton"
-                Grid.Row="3"
-                Content="EXIT"
-                Height="42"
-                FontWeight="Bold"
-                Background="#424242"
-                Foreground="White"
-                Click="ExitButton_Click"/>
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="ShowDisturbancesButton"
+                            Grid.Column="0"
+                            Content="EXPERIMENT"
+                            Height="42"
+                            FontWeight="Bold"
+                            Background="#9A6700"
+                            BorderBrush="#D99A1D"
+                            Foreground="White"
+                            Margin="0,0,5,0"
+                            ToolTip="Open experimental disturbance controls."
+                            Click="ShowDisturbancesButton_Click"/>
+
+                    <Button x:Name="ExitButton"
+                            Grid.Column="1"
+                            Content="EXIT"
+                            Height="42"
+                            FontWeight="Bold"
+                            Background="#424242"
+                            Foreground="White"
+                            Margin="5,0,0,0"
+                            Click="ExitButton_Click"/>
+                </Grid>
             </Grid>
         </Border>
     </Grid>

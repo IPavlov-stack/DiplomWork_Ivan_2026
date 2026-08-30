@@ -41,6 +41,7 @@ namespace DiplomWork_Ivan_2026
                 }
 
                 _process.LoadMaterial(material);
+                _process.SetLeakMultiplier(1.0);
                 _automaticProcessController.Reset(_process.State, _settings);
                 _trendBuffer.BeginExperiment(CreateExperimentMetadata(material));
                 ResetDisturbanceTracking();
@@ -48,6 +49,9 @@ namespace DiplomWork_Ivan_2026
                 _processStarted = true;
             }
 
+            // Execute the first controller calculation immediately. Subsequent
+            // outputs are held until the next controller sampling instant.
+            _controllerElapsedSeconds = _controllerStepSeconds;
             _isRunning = true;
             _timer.Start();
 
@@ -97,6 +101,9 @@ namespace DiplomWork_Ivan_2026
                 _process.LoadMaterial(material);
             }
 
+            _process.SetLeakMultiplier(1.0);
+            ResetDisturbanceTracking();
+
             _safetyInterlockService.Clear(_process);
 
             _trendBuffer.Clear();
@@ -119,17 +126,27 @@ namespace DiplomWork_Ivan_2026
 
             for (int sample = 0; sample < _simulationSpeedMultiplier; sample++)
             {
-                // Physics, sensors, controllers and safety run at 10 Hz. Trends
-                // still receive exactly one sample per simulated second.
+                // The physical model and safety evaluation use the model step.
+                // Controller outputs are updated at their own slower sampling
+                // interval and held between calculations. Trends still receive
+                // exactly one sample per simulated second.
                 for (int substep = 0;
                     substep < IntegrationSubstepsPerTrendSample;
                     substep++)
                 {
                     _safetyInterlockService.Evaluate(_process, _settings);
-                    UpdateControllers(SimulationIntegrationStepSeconds);
+
+                    if (_controllerElapsedSeconds + 0.000000001 >=
+                        _controllerStepSeconds)
+                    {
+                        UpdateControllers(_controllerStepSeconds);
+                        _controllerElapsedSeconds = 0.0;
+                    }
+
                     _process.Update(
-                        SimulationIntegrationStepSeconds,
+                        _modelStepSeconds,
                         _settings);
+                    _controllerElapsedSeconds += _modelStepSeconds;
                     _safetyInterlockService.Evaluate(_process, _settings);
 
                     if (_process.State.IsCompleted)
@@ -263,13 +280,30 @@ namespace DiplomWork_Ivan_2026
 
         private void EmergencyStopButton_Click(object sender, RoutedEventArgs e)
         {
-            _isRunning = false;
-            _timer.Stop();
+            if (_process.State.EmergencyStopActive)
+                return;
+
+            _trendBuffer.Metadata?.AddDisturbance(
+                "EmergencyStop",
+                _process.State.ElapsedTime);
+
             _safetyInterlockService.Trip(
                 _process,
                 L("Emergency stop activated by the operator.",
                   "Аварийното спиране е задействано от оператора."),
                 true);
+
+            if (_trendBuffer.Metadata != null)
+            {
+                _trendBuffer.AddPoint(
+                    _process.State,
+                    _settings,
+                    _simulationSpeedMultiplier);
+                UpdateChartData();
+            }
+
+            _isRunning = false;
+            _timer.Stop();
             _alarmService.CheckAlarms(_process, _settings);
             UpdateUi();
         }
@@ -341,10 +375,9 @@ namespace DiplomWork_Ivan_2026
                     _pidTemperatureController.DerivativeFilterTimeConstantSeconds,
                 PressurePiKp = _pressureController.Kp,
                 PressurePiKi = _pressureController.Ki,
-                ModelStepSeconds = SimulationIntegrationStepSeconds,
-                ControllerStepSeconds = SimulationIntegrationStepSeconds,
-                TrendSampleIntervalSeconds =
-                    SimulationIntegrationStepSeconds * IntegrationSubstepsPerTrendSample,
+                ModelStepSeconds = _modelStepSeconds,
+                ControllerStepSeconds = _controllerStepSeconds,
+                TrendSampleIntervalSeconds = FixedTrendSampleIntervalSeconds,
                 SimulationSpeedAtStart = _simulationSpeedMultiplier,
                 AmbientTemperatureC = _settings.AmbientTemperature,
                 AmbientPressureKPa = _settings.AmbientPressure,
@@ -396,12 +429,12 @@ namespace DiplomWork_Ivan_2026
             if (currentMode == previousMode)
                 return;
 
-            if (currentMode != Enums.SensorFaultMode.None)
-            {
-                _trendBuffer.Metadata?.AddDisturbance(
-                    $"{sensorName}:{currentMode}",
-                    _process.State.ElapsedTime);
-            }
+            string disturbanceType = currentMode == Enums.SensorFaultMode.None
+                ? $"{sensorName}:Cleared"
+                : $"{sensorName}:{currentMode}";
+            _trendBuffer.Metadata?.AddDisturbance(
+                disturbanceType,
+                _process.State.ElapsedTime);
 
             previousMode = currentMode;
         }

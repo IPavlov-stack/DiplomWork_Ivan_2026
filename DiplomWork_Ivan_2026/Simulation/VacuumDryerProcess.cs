@@ -23,6 +23,7 @@ namespace DiplomWork_Ivan_2026.Simulation
         public VirtualAnalogSensor MaterialTemperatureSensor { get; } = new VirtualAnalogSensor(5.0, 0.03, 0.1, -50.0, 250.0, 202);
         public VirtualAnalogSensor PressureSensor { get; } = new VirtualAnalogSensor(1.0, 0.03, 0.1, 0.0, 120.0, 303);
         public DryingMaterial? SelectedMaterial { get; private set; }
+        public double LeakMultiplier { get; private set; } = 1.0;
 
         public VacuumDryerProcess(VacuumDryerModelParameters? parameters = null)
         {
@@ -33,6 +34,11 @@ namespace DiplomWork_Ivan_2026.Simulation
             ChamberTemperatureSensor.FaultMode != Enums.SensorFaultMode.None ||
             MaterialTemperatureSensor.FaultMode != Enums.SensorFaultMode.None ||
             PressureSensor.FaultMode != Enums.SensorFaultMode.None;
+
+        public void SetLeakMultiplier(double value)
+        {
+            LeakMultiplier = Math.Clamp(value, 1.0, 20.0);
+        }
 
         public void LoadMaterial(DryingMaterial material)
         {
@@ -181,8 +187,10 @@ namespace DiplomWork_Ivan_2026.Simulation
             double pumpPressureDerivative =
                 -pumpInput / Parameters.VacuumTimeConstantSeconds *
                 (pressure - Parameters.MinimumPressureKPa);
+            double effectiveLeakageCoefficient =
+                Parameters.LeakageCoefficientPerSecond * LeakMultiplier;
             double leakagePressureDerivative =
-                Parameters.LeakageCoefficientPerSecond *
+                effectiveLeakageCoefficient *
                 (settings.AmbientPressure - pressure);
             double ventValvePressureDerivative =
                 ventValveInput / Parameters.VentValveTimeConstantSeconds *
@@ -332,7 +340,7 @@ namespace DiplomWork_Ivan_2026.Simulation
                 0.0,
                 1.0);
             double gasIngressCoefficientPerSecond =
-                Parameters.LeakageCoefficientPerSecond +
+                Parameters.LeakageCoefficientPerSecond * LeakMultiplier +
                 ventValveInput / Parameters.VentValveTimeConstantSeconds;
             double ambientVaporIngressRateKgPerSecond =
                 gasIngressCoefficientPerSecond *
@@ -501,7 +509,7 @@ namespace DiplomWork_Ivan_2026.Simulation
                     settings.AmbientPressure - State.Pressure);
                 double valveInput = Math.Max(0.01, VentValve.Opening / 100.0);
                 double recoveryCoefficient =
-                    Parameters.LeakageCoefficientPerSecond +
+                    Parameters.LeakageCoefficientPerSecond * LeakMultiplier +
                     valveInput / Parameters.VentValveTimeConstantSeconds;
                 State.EstimatedRemainingTimeSeconds = Math.Max(
                     0.0,
