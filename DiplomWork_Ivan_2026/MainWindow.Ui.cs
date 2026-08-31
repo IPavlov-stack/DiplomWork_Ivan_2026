@@ -128,29 +128,39 @@ namespace DiplomWork_Ivan_2026
             MaterialComboBox.IsEnabled = recipeCanBeChanged;
             DryingModeComboBox.IsEnabled = recipeCanBeChanged;
 
-            if (_process.State.SafetyInterlockActive)
-            {
-                StartButton.Content = L("SAFETY LOCKED", "БЛОКИРАНО ОТ ЗАЩИТА");
-                StartButton.IsEnabled = false;
-            }
-            else if (_isRunning)
-            {
-                StartButton.Content = L("RUNNING", "РАБОТИ");
-                StartButton.IsEnabled = false;
-            }
-            else if (_processStarted)
+            bool startIsAvailable =
+                !state.SafetyInterlockActive && !_isRunning;
+            StartButton.Visibility = startIsAvailable
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            StartButton.IsEnabled = startIsAvailable;
+
+            if (_processStarted)
             {
                 StartButton.Content = L("Resume", "Продължи");
-                StartButton.IsEnabled = true;
             }
             else
             {
                 StartButton.Content = L("Start", "Старт");
-                StartButton.IsEnabled = true;
             }
 
+            StopButton.Visibility = _isRunning
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             StopButton.IsEnabled = _isRunning;
-            ResetButton.IsEnabled = _processStarted || state.ElapsedTime > 0.0 || state.IsCompleted;
+
+            bool resetIsAvailable =
+                _processStarted ||
+                state.ElapsedTime > 0.0 ||
+                state.IsCompleted;
+            ResetButton.Visibility = resetIsAvailable
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            ResetButton.IsEnabled = resetIsAvailable;
+
+            ResetSafetyButton.Visibility = state.SafetyInterlockActive
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             ResetSafetyButton.IsEnabled = state.SafetyInterlockActive;
         }
 
@@ -221,7 +231,9 @@ namespace DiplomWork_Ivan_2026
             var state = _process.State;
             ClearContextValues();
             ControllerSettingsButton.Visibility = Visibility.Collapsed;
-            ControllerSettingsButton.IsEnabled = !_processStarted && !_isRunning;
+            ControllerSettingsButton.IsEnabled = true;
+            bool controllerSettingsAreAvailable =
+                !_processStarted && !_isRunning;
             string controllerMode = TemperatureControlComboBox?.SelectedIndex == 1
                 ? "PID"
                 : "ON/OFF";
@@ -248,7 +260,8 @@ namespace DiplomWork_Ivan_2026
                         $"Kp={_pidTemperatureController.Kp:0.###}; " +
                         $"Ki={_pidTemperatureController.Ki:0.###}; " +
                         $"Kd={_pidTemperatureController.Kd:0.###}", SemanticNeutral);
-                    ConfigureControllerSettingsButton("PID SETTINGS", "PID НАСТРОЙКИ");
+                    if (controllerSettingsAreAvailable)
+                        ConfigureControllerSettingsButton("PID SETTINGS", "PID НАСТРОЙКИ");
                     break;
 
                 case "Pump":
@@ -270,7 +283,8 @@ namespace DiplomWork_Ivan_2026
                     SetContextValue(ContextValue5TextBlock,
                         $"Kp={_pressureController.Kp:0.###}; " +
                         $"Ki={_pressureController.Ki:0.###}", SemanticNeutral);
-                    ConfigureControllerSettingsButton("PI SETTINGS", "PI НАСТРОЙКИ");
+                    if (controllerSettingsAreAvailable)
+                        ConfigureControllerSettingsButton("PI SETTINGS", "PI НАСТРОЙКИ");
                     break;
 
                 case "Fan":
@@ -336,13 +350,9 @@ namespace DiplomWork_Ivan_2026
         {
             ControllerSettingsButton.Content = L(englishContent, bulgarianContent);
             ControllerSettingsButton.Visibility = Visibility.Visible;
-            ControllerSettingsButton.ToolTip = ControllerSettingsButton.IsEnabled
-                ? L(
-                    "Edit the controller coefficients.",
-                    "Промяна на коефициентите на регулатора.")
-                : L(
-                    "Controller coefficients can be changed before starting a batch.",
-                    "Коефициентите могат да се променят преди стартиране на партида.");
+            ControllerSettingsButton.ToolTip = L(
+                "Edit the controller coefficients.",
+                "Промяна на коефициентите на регулатора.");
         }
 
         private void ControllerSettingsButton_Click(object sender, RoutedEventArgs e)

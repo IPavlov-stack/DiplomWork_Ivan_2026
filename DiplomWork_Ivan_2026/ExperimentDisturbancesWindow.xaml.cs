@@ -94,17 +94,30 @@ namespace DiplomWork_Ivan_2026
                 _canConfigureDiscretization();
             ApplyDiscretizationButton.IsEnabled =
                 canConfigureDiscretization;
+            ApplyDiscretizationButton.Visibility =
+                canConfigureDiscretization
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
             ModelStepComboBox.IsEnabled =
                 canConfigureDiscretization;
             ControllerStepComboBox.IsEnabled =
                 canConfigureDiscretization;
             ApplyLeakButton.IsEnabled = canInject;
+            ApplyLeakButton.Visibility = canInject
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             ApplySensorFaultButton.IsEnabled = canInject;
+            ApplySensorFaultButton.Visibility = canInject
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             bool hasActiveDisturbance =
                 _process.LeakMultiplier > 1.0 ||
                 _process.HasSensorFault;
             ClearDisturbancesButton.IsEnabled = hasActiveDisturbance;
+            ClearDisturbancesButton.Visibility = hasActiveDisturbance
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             ActiveStateTextBlock.Foreground = hasActiveDisturbance
                 ? ActiveBrush
@@ -355,14 +368,6 @@ namespace DiplomWork_Ivan_2026
                 _ when includeLongControllerSteps => 6,
                 _ => 4
             };
-
-        private void Header_MouseLeftButtonDown(
-            object sender,
-            MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-                DragMove();
-        }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e) =>
             Close();

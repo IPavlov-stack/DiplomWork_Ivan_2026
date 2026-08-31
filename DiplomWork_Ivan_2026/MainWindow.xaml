@@ -108,10 +108,11 @@
 
                                 <Button x:Name="StartButton"
                                 Grid.Column="0"
+                                Grid.ColumnSpan="2"
                                 Content="Start"
                                 Height="42"
                                 FontWeight="Bold"
-                                Margin="0,0,5,0"
+                                Margin="0"
                                 Click="StartButton_Click">
 
                                     <Button.Style>
@@ -146,14 +147,15 @@
                                 </Button>
 
                                 <Button x:Name="StopButton"
-                                Grid.Column="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
                                 Content="Pause"
                                 Height="42"
                                 FontWeight="Bold"
                                 Background="#455A64"
                                 Foreground="White"
-                                Margin="5,0,0,0"
-                                IsEnabled="False"
+                                Margin="0"
+                                Visibility="Collapsed"
                                 ToolTip="Pause the simulation and set all actuator outputs to zero. The batch can be resumed."
                                 Click="StopButton_Click"/>
                             </Grid>
@@ -166,7 +168,7 @@
                         Background="#455A64"
                         Foreground="White"
                         Margin="0,10,0,0"
-                        IsEnabled="False"
+                        Visibility="Collapsed"
                         ToolTip="Clear the current batch progress and trend history."
                         Click="ResetButton_Click"/>
                         </StackPanel>
@@ -196,7 +198,7 @@
                             Background="#F9A825"
                             Foreground="White"
                             Margin="0,8,0,0"
-                            IsEnabled="False"
+                            Visibility="Collapsed"
                             ToolTip="Available after a safety trip and only when safe reset conditions are met."
                             Click="ResetSafetyButton_Click"/>
                         </StackPanel>

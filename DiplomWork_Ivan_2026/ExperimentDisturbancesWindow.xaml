@@ -6,7 +6,6 @@
         Height="800"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        WindowStyle="None"
         ShowInTaskbar="False"
         Background="#595959"
         KeyDown="Window_KeyDown">
@@ -23,24 +22,12 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="110"/>
-                </Grid.ColumnDefinitions>
-
+            <Grid Grid.Row="0">
                 <TextBlock Text="Experiment disturbances"
                            Foreground="White"
                            FontSize="24"
                            FontWeight="Bold"
                            VerticalAlignment="Center"/>
-                <Button Grid.Column="1"
-                        Content="CLOSE"
-                        Height="36"
-                        Background="#B71C1C"
-                        Foreground="White"
-                        FontWeight="Bold"
-                        Click="CloseButton_Click"/>
             </Grid>
 
             <Border Grid.Row="1"
@@ -243,6 +230,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="110"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="Emergency Stop remains available on the main screen."
@@ -254,10 +242,18 @@
                         Grid.Column="1"
                         Content="CLEAR DISTURBANCES"
                         Height="40"
+                        Margin="0,0,10,0"
                         Background="#455A64"
                         Foreground="White"
                         FontWeight="Bold"
                         Click="ClearDisturbancesButton_Click"/>
+                <Button Grid.Column="2"
+                        Content="CLOSE"
+                        Height="40"
+                        Background="#B71C1C"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Click="CloseButton_Click"/>
             </Grid>
         </Grid>
     </Border>
